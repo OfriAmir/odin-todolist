@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# package-lock.json. It can be made running "npm install" just like the node_modules directory so there's no nedd to save it in the repo.
+package-lock.json
