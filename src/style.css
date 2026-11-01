@@ -1,3 +1,123 @@
-h1 {
-    color: red;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --blue-dark: hsl(239, 72%, 11%);
+    --grey9: hsl(0, 0%, 90%);
+    --grey8: hsl(0, 0%, 80%);
+    --grey7: hsl(0, 0%, 70%);
+    --grey6: hsl(0, 0%, 60%);
+    --grey5: hsl(0, 0%, 50%);
+    --grey2: hsl(0, 0%, 20%);
+    --light-black: hsl(0, 0%, 0%, 0.2);
+}
+
+header{
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    background-color: var(--grey5);
+    height: 100px;
+}
+
+header>div:nth-child(2){
+    display: grid;
+    grid-template-columns: 150px 1fr;
+}
+
+header>div:nth-child(2)>div:first-child{
+    place-self: center;
+    font-size: 1.5rem;
+    margin-top: 16px;
+}
+header>div:nth-child(2)>div:first-child>a{
+    text-decoration: none;
+    color: black
+}
+header>div:nth-child(2)>div:first-child>a:hover{
+    color: var(--grey2);
+}
+
+header div.projects-wrapper{
+    display: grid;
+    grid-template-columns: 1fr 100px;
+    margin: 16px 8px 0px 8px;
+    border: 1px solid var(--light-black);
+    border-bottom: none;
+     
+}
+
+header div.projects-wrapper>ol{
+    display: grid;
+    grid-template-columns: 150px;
+    grid-auto-columns: 150px;
+    grid-auto-flow: column;
+    column-gap: 1px;
+    background-color: var(--grey7);
+    
+}
+header div.projects-wrapper>ol>li{
+    list-style: none;
+    display: block;
+    display: grid;
+    place-content: center;
+    background-color: var(--grey8);
+}
+
+header div.projects-wrapper>ol>li:hover,
+header div.projects-wrapper>ol>li:active{
+    background-color: var(--grey9);
+}
+main{
+    display: grid;
+    justify-items: center;
+    padding: 0 35%;
+}
+main>*{
+    margin-top: 24px;
+}
+
+main>ul{
+    justify-self: left;
+}
+
+main>ul>li{
+    list-style: none;
+    margin-top: 8px;
+}
+
+main>ul>li:first-of-type{
+    margin-top: 0;
+}
+
+main>ul>li>h2{
+    display: inline;
+    font-size: 1.3rem;
+}
+
+
+main .card{
+    width: 300px;
+    height: 240px;
+    background-color: var(--grey6);
+    border-radius: 32px;
+    padding: 24px;
+    box-shadow: 3px 3px 10px var(--light-black);
+}
+
+main .card:hover,
+main .card:active{
+    background-color: var(--grey8);
+    cursor: pointer;
+}
+main div.card:first-of-type{
+    margin-top: 32px;
+}
+main .card h2{
+    text-align: center;
+}
+
+main .card li{
+    list-style: none;
 }

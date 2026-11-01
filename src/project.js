@@ -1,18 +1,70 @@
-import WritingEntity from "./writing-entity.js"
-import TodoItem from "./todo-item.js"
+import {writingEntity} from "./writing-entity.js"
 
-export default class Project extends WritingEntity {
-    #todos = []
+export const project = (function(){
+    let _all = []
 
-    constructor(){
-        super()
+    function getAllProjects(){
+        return _all
     }
 
-    addTodo(obj){
-        this.#todos.append(obj)
-    }
+    function createInstance(title, description){
+        let _todos = []
+        function getAllTodos() {
+            return _todos
+        }
+        function createTodo() {
+            let currentInstance = writingEntity.createInstance(title, description);
+            Object.defineProperties(currentInstance,{
+                dueDate: {
+                    set(date){
+                        this._dueDate = date
+                        writingEntity.defaultSort(_todos);
+                    },
+                    get(){
+                        return this._dueDate
+                    }
+                },
+                priority: {
+                    set(number){
+                        this._priority = writingEntity.defaultPriorityOptions.at(number)
+                        writingEntity.defaultSort(_todos)
+                    },
+                    get(){
+                        return this._priority
+                    }
+                }
+            })
+            writingEntity.addInstanceToArr(currentInstance, _todos)
+            return currentInstance
+        }
 
-}
+        let currentInstance = Object.assign({}, writingEntity.createInstance(title, description), {getAllTodos, createTodo,});
+        Object.defineProperties(currentInstance,{
+            dueDate: {
+                set(date){
+                    this._dueDate = date
+                    writingEntity.defaultSort(_all);
+                },
+                get(){
+                    return this._dueDate
+                }
+            },
+            priority: {
+                set(number){
+                    this._priority = writingEntity.defaultPriorityOptions.at(number)
+                    writingEntity.defaultSort(_all)
+                },
+                get(){
+                    return this._priority
+                }
+            }
+        })
+        writingEntity.addInstanceToArr(currentInstance, _all);
+        return currentInstance
+    }
+    
+    return {getAllProjects, createInstance}
+})()
 
 
 

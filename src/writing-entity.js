@@ -1,77 +1,57 @@
-import {format} from "date-fns"
+import {format, compareAsc} from "date-fns"
 
-export default class writingEntity {
-
-    #title
-    #description
-    #dueDate
-    #priority
-    static #defaultPriorityOptions = ["Very low", "Low", "Medium", "High", "Very high", "unspecified"]
-    #notes
-    #checklist = []
-    #complete
-
-    constructor(title, description){
-        this.#title = title
-        this.#description = description
+export const writingEntity = (function() {
+    const defaultPriorityOptions = [
+        {
+            name: "Unspecified",
+            number: 0,
+        },
+        {
+            name: "Very high",
+            number: 1,
+        },
+        {
+            name: "High",
+            number: 2,
+        },
+        {
+            name: "Medium",
+            number: 3,
+        },
+        {
+            name: "Low",
+            number: 4,
+        },   
+        {
+            name: "Very low",
+            number: 5,
+        },
+    ]
+    function defaultSort(Arr) {
+        Arr.sort((a,b) => {
+            if ((a.priority.number < b.priority.number) && a.priority.number > 0) return 1;
+            else if ((a.priority.number > b.priority.number) && b.priority.number > 0) return -1;
+            if (a.dueDate || b.dueDate){
+                if (a.dueDate && !b.dueDate) return 1
+                else if (!a.dueDate && b.dueDate) return -1
+                else if (compareAsc(a.dueDate, b.dueDate) == 1) return 1;
+                else if (compareAsc(a.dueDate, b.dueDate) == -1) return -1;
+            } else if (a.creationDate < b.creationDate) return 1;
+            else if (a.creationDate > b.creationDate) return -1;
+            // else if (a.priority.number == 0) return -1
+            // else if (b.priority.number == 0) return 1;
+            else return 0;
+        })
     }
-
-    get title() {
-        return this.#title
+    function createInstance(title, description){
+        let creationDate, _priority, _dueDate, notes, checklist, complete, pin
+        creationDate = Date.now()
+        _priority = defaultPriorityOptions[0]
+        return {title, description, creationDate, _priority, _dueDate, notes, checklist, complete, pin}
     }
-
-    set title(data) {
-        this.#title = data 
+    function addInstanceToArr(instance, arr){
+        arr.push(instance);
+        if (arr.length > 1) writingEntity.defaultSort(arr);
     }
-
-    get description() {
-        return this.#description
-    }
-
-    set description(data) {
-        this.#description = data 
-    }
-
-    get dueDate(){
-        return this.#dueDate
-    }
-
-    set dueDate(date){
-        this.#dueDate = format(date,"MMMM do, y");
-    }
-
-    get priority(){
-        return this.#priority
-    }
-
-    set priority(index){
-        this.#priority = TodoItem.#defaultPriorityOptions[index]
-    }
-
-    get notes(){
-        return this.#notes
-    }
-
-    set notes(data){
-        this.#notes = data
-    }
-
-    get checklist(){
-        return this.#checklist
-    }
-
-    addToChecklist(data, index = this.#checklist.length){
-        if (index < this.#checklist.length) {
-            index = this.#checklist.length
-        }
-        this.#checklist[index] = data
-    }
-
-    get complete(){
-        return this.#complete
-    }
-
-    set complete(choice){
-        this.#complete = choice
-    }
-}
+    return {defaultPriorityOptions, defaultSort, createInstance, addInstanceToArr}
+})()

@@ -4,7 +4,10 @@
   "description": "A template for a website with HTML, CSS, JS, package.json, webpack.configuration.js, .gitignore and maybe more...",
   "main": "webpack.common.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.prod.js",
+    "dev": "webpack serve --open --config webpack.dev.js",
+    "deploy": "git subtree push --prefix dist origin gh-pages"
   },
   "repository": {
     "type": "git",
