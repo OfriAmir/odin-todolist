@@ -3,27 +3,27 @@ import {compareAsc} from "date-fns"
 export const writingEntity = (function() {
     const defaultPriorityOptions = [
         {
-            name: "Unspecified",
+            name: "unspecified",
             number: 0,
         },
         {
-            name: "Very high",
+            name: "very high",
             number: 1,
         },
         {
-            name: "High",
+            name: "high",
             number: 2,
         },
         {
-            name: "Medium",
+            name: "medium",
             number: 3,
         },
         {
-            name: "Low",
+            name: "low",
             number: 4,
         },   
         {
-            name: "Very low",
+            name: "very low",
             number: 5,
         },
     ]
@@ -48,6 +48,11 @@ export const writingEntity = (function() {
         creationDate = Date.now()
         _priority = defaultPriorityOptions[0]
         id = crypto.randomUUID()
+        _dueDate = {
+            date: "unspecified",
+            formattedDate: "unspecified",
+        }
+        checklist = []
         return {title, description, creationDate, _priority, id, _dueDate, notes, checklist, complete, pin}
     }
     function addInstanceToArr(instance, arr){

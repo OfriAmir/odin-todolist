@@ -127,7 +127,7 @@ main .card li{
     list-style: none;
 }
 
-aside>div{
+aside{
     width: 300px;
     height: 800px;
     border-left: 1px dashed black;
@@ -136,14 +136,15 @@ aside>div{
     right: 24px;
     padding: 0 16px 0 24px;
 }
-aside>div ul{
+
+aside ul{
     margin-top: 16px;
 }
-aside>div li{
+
+aside li{
     list-style:circle;
-    
 }
 
-aside>div li::marker{
+aside li::marker{
     margin: 1.5rem;
 }
