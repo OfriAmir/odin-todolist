@@ -1,4 +1,4 @@
-import {format, compareAsc} from "date-fns"
+import {compareAsc} from "date-fns"
 
 export const writingEntity = (function() {
     const defaultPriorityOptions = [
@@ -44,10 +44,11 @@ export const writingEntity = (function() {
         })
     }
     function createInstance(title, description){
-        let creationDate, _priority, _dueDate, notes, checklist, complete, pin
+        let creationDate, _priority, id, _dueDate, notes, checklist, complete, pin
         creationDate = Date.now()
         _priority = defaultPriorityOptions[0]
-        return {title, description, creationDate, _priority, _dueDate, notes, checklist, complete, pin}
+        id = crypto.randomUUID()
+        return {title, description, creationDate, _priority, id, _dueDate, notes, checklist, complete, pin}
     }
     function addInstanceToArr(instance, arr){
         arr.push(instance);
