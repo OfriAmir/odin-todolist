@@ -132,6 +132,7 @@ aside{
     height: 800px;
     border-left: 1px dashed black;
     position: absolute;
+    z-index: -1;
     top: 300px;
     right: 24px;
     padding: 0 16px 0 24px;

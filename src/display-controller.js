@@ -1,52 +1,40 @@
-import {format} from "date-fns"
+import { format } from "date-fns"
 
 export const displayControllerWithModule = function(projectModule){
     const refs = {
-        header: {
-            header: document.querySelector("header"), //Not sure I'll use it but for completeness I added it...
-            ol: document.querySelector("header nav>ol"),
-            lis: [],
-            myProjectsBtn: document.querySelector(".my-projects-btn"),
-        },
-
-        main: {
-            main: document.querySelector("main"),
-            h1: document.querySelector("main>h1"),
-            // ul: document.querySelector("main>ul"),
-            // lis: document.querySelectorAll("main>ul>li"),
-            // divs: document.querySelectorAll("main>div"),
-        },
-
-        aside: {
-            aside: document.querySelector("aside"),
-            h2: document.querySelector("aside>h2"),
-            // ul: document.querySelector("aside>ul"),
-        }
+        header: document.querySelector("header"),
+        main: document.querySelector("main"),
+        aside: document.querySelector("aside"),
 
     }
-
+    refs.header.ol = document.querySelector("header nav>ol")
+    refs.header.lis = []
+    refs.header.myProjectBtn = document.querySelector("header .my-projects-btn")
+    refs.main.h1 = document.querySelector("main>h1")
+    refs.main.ul = document.querySelector("main>ul")
+    refs.main.lis = document.querySelectorAll("main>ul>li")
+    refs.main.divs = []
+    refs.aside.h2 = document.querySelector("aside>h2")
+    refs.aside.ul = document.querySelector("aside>ul")
+    refs.aside.lis = []
     function displayProjectsNav(){
         const projectsDataArr = projectModule.getAllProjects() 
         projectsDataArr.forEach((project, index)=> {
-            let ref
-            if (index < refs.header.lis.length - 1) ref = refs.header.lis[index]
+            let li
+            if (index < refs.header.lis.length - 1) li = refs.header.lis[index]
             else {
-                ref = document.createElement("li")
-                refs.header.lis.push(ref)
+                li = document.createElement("li")
+                refs.header.lis.push(li)
             } 
-            ref.textContent = `${project.title}`
-            ref.dataset.id = project.id
-            refs.header.ol.appendChild(ref)
+            li.textContent = `${project.title}`
+            li.dataset.id = project.id
+            refs.header.ol.appendChild(li)
+            li.classList.add("active")
         });
     }
-    //added to refs
+
     
     function displayMain(instance) {
-        // refs.header.h1.textContent = instance.title
-        // const lisDataArr = [instance.description, instance.priority.name, format(instance.dueDate,"HH:mm MMMM do, y")]
-        // refs.header.lis.forEach((element,index) => {
-        //     element.textContent = `${lisDataArr[index]}`
-        // })
         if (instance){
             if (instance.hasOwnProperty("getAllTodos")){
                 displayMainTitleAndInfo(instance)
@@ -67,17 +55,12 @@ export const displayControllerWithModule = function(projectModule){
     function displayMainTitleAndInfo(instance) {
         if (instance){
             refs.main.h1.textContent = instance.title
-            const ul = document.createElement("ul")
-            refs.main.main.appendChild(ul)
-            const lis = []
-            for (let i=0; i<3; i++){
-                lis.push(document.createElement("li"))
-            }
+            refs.main.ul.classList.add("active")
             const names = ["Description", "Priority", "Due Date"]
             const content = [instance.description, instance.priority.name, instance.dueDate.formattedDate]
-            lis.forEach((li, index) => {
+            refs.main.lis.forEach((li, index) => {
                 li.textContent = `${names[index]}: ${content[index]}`
-                ul.appendChild(li)
+                li.classList.add("active")
             })
         } else {
             refs.main.h1.textContent = "My Projects"
@@ -85,50 +68,68 @@ export const displayControllerWithModule = function(projectModule){
     }
 
     function displayCards(dataArr){
-        dataArr.forEach(instance => {
-            const div = document.createElement("div")
-            div.classList.toggle("card")
+        dataArr.forEach((instance, index) => {
+            let div
+            if (index < refs.main.divs.length - 1) {
+                div = refs.main.divs[index]
+            } else {
+                div = document.createElement("div")
+                div.h2 = document.createElement("h2")
+                div.ul = document.createElement("ul")
+                div.lis = [document.createElement("li"), document.createElement("li"), document.createElement("li")]
+                div.classList.toggle("card")
+                refs.main.divs.push(div)
+                div.appendChild(div.h2)
+                div.appendChild(div.ul)
+                div.lis.forEach(li => div.ul.appendChild(li))
+                refs.main.appendChild(div)
+            } 
             div.dataset.id = instance.id
-            refs.main.main.appendChild(div)
-            const h2 = document.createElement("h2")
-            h2.textContent = instance.title
-            div.appendChild(h2)
-            const ul = document.createElement("ul")
-            div.appendChild(ul)
-            const lis = []
-            for (let i=0; i<3; i++){
-                lis.push(document.createElement("li"))
-            }
+            div.h2.textContent = instance.title
+            div.classList.add("active")
             const names = ["Description", "Priority", "Due Date"]
             const content = [instance.description, instance.priority.name, instance.dueDate.formattedDate]
-            lis.forEach((li, index) => {
+            div.lis.forEach((li, index) => {
                 li.textContent = `${names[index]}: ${content[index]}`
-                ul.appendChild(li)
             })
         })
     }
+    //added to refs
 
     function displayChecklist(instance){
         if (!instance.checklist) return
-        const ul = document.createElement("ul")
-        refs.aside.aside.appendChild(ul)
-        instance.checklist.forEach(item => {
-            const li = document.createElement("li")
+        instance.checklist.forEach((item, index) => {
+            let li
+            if (index < refs.aside.lis.length - 1) {
+                li = refs.aside.lis[index]
+            } else {
+                li = document.createElement("li")
+                refs.aside.lis.push(li)
+                refs.aside.ul.appendChild(li)
+            }
             li.textContent = item.content
-            ul.appendChild(li)
+            li.classList.add("active")
+            
         })
     }
     // Checklist should be an array of {content, complete} objects.
 
+
     function clearMain(){
-        const content = document.querySelectorAll("main *:not(h1)")
-        content.forEach((element) => refs.main.main.removeChild(element))
+        const content = document.querySelectorAll("main .active")
+        content.forEach((element) => {
+            element.classList.remove("active")
+            element.remove()
+        })
     }
 
     function clearAside(){
-        const content = document.querySelectorAll("aside *:not(h2)")
-        content.forEach((element) => refs.aside.aside.removeChild(element))       
+        const content = document.querySelectorAll("aside .active")
+        content.forEach((element) => {
+            element.classList.remove("active")
+            element.remove()
+        })
     }
 
-    return {displayProjectsNav, displayMain, clearMain, clearMain}
+    return {displayProjectsNav, displayMain, clearMain, clearAside}
 }
