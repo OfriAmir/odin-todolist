@@ -11,6 +11,6 @@ import {displayControllerWithModule} from "./display-controller.js"
     const displayController = displayControllerWithModule(project)
     displayController.displayProjectsNav()
     displayController.displayMain(myProject1)
-    displayController.clearMain()
+    // displayController.clearMain()
 })()
 
