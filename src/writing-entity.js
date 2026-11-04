@@ -44,7 +44,7 @@ export const writingEntity = (function() {
         })
     }
     function createInstance(title, description){
-        let creationDate, _priority, id, _dueDate, notes, checklist, complete, pin
+        let creationDate, _priority, id, _dueDate, notes, checkList, complete, pin
         creationDate = Date.now()
         _priority = defaultPriorityOptions[0]
         id = crypto.randomUUID()
@@ -52,8 +52,8 @@ export const writingEntity = (function() {
             date: "unspecified",
             formattedDate: "unspecified",
         }
-        checklist = []
-        return {title, description, creationDate, _priority, id, _dueDate, notes, checklist, complete, pin}
+        checkList = []
+        return {title, description, creationDate, _priority, id, _dueDate, notes, checkList, complete, pin}
     }
     function addInstanceToArr(instance, arr){
         arr.push(instance);

@@ -21,6 +21,7 @@ header{
     height: 100px;
     position: sticky;
     top: 0;
+    z-index: 2;
 }
 
 header>div:nth-child(2){
@@ -78,6 +79,7 @@ main{
     display: grid;
     justify-items: center;
     padding: 0 35%;
+    /* position: relative; */
 }
 main>*{
     margin-top: 24px;
@@ -132,7 +134,7 @@ aside{
     height: 800px;
     border-left: 1px dashed black;
     position: absolute;
-    z-index: -1;
+    /* z-index: -1; */
     top: 300px;
     right: 24px;
     padding: 0 16px 0 24px;
