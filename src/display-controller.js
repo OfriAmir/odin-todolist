@@ -10,13 +10,14 @@ export const displayControllerWithModule = function(projectModule){
         header: document.querySelector("header"),
         main: document.querySelector("main"),
         aside: document.querySelector("aside"),
-
+        addWritingEntityDialog: document.querySelector("dialog.add-project-dialog")
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
     refs.header.myProjectBtn = document.querySelector("header .my-projects-btn")
-    refs.main.h1 = document.querySelector("main>h1")
+    refs.header.addPro
 
+    refs.main.h1 = document.querySelector("main>h1")
     refs.main.ul = document.querySelector("main>ul")
     refs.main.ul.classList.add("active")
     refs.main.lis = document.querySelectorAll("main>ul>li")
@@ -27,6 +28,15 @@ export const displayControllerWithModule = function(projectModule){
     refs.aside.h2 = document.querySelector("aside>h2")
     refs.aside.ul = document.querySelector("aside>ul")
     refs.aside.lis = []
+
+    refs.addWritingEntityDialog.titleInput = refs.addWritingEntityDialog.querySelector("input[id=title]")
+    refs.addWritingEntityDialog.descriptionInput = refs.addWritingEntityDialog.querySelector("textarea[id=description]")
+    refs.addWritingEntityDialog.priorityInputs = refs.addWritingEntityDialog.querySelector("fieldset>input[type=radio]")
+    refs.addWritingEntityDialog.dueDateInput = refs.addWritingEntityDialog.querySelector("input[id=due-date]")
+    refs.addWritingEntityDialog.notesInput = refs.addWritingEntityDialog.querySelector("textarea[id=notes]")
+    refs.addWritingEntityDialog.submitBtn = refs.addWritingEntityDialog.querySelector("button[type=submit]")
+    refs.addWritingEntityDialog.cancelBtn = refs.addWritingEntityDialog.querySelector("button[type=button]")
+    console.log(refs.addWritingEntityDialog.cancelBtn)
 
     let currentActive = {
         header: {
@@ -90,23 +100,6 @@ export const displayControllerWithModule = function(projectModule){
         displayCards(tabType)
         displayMainTitleAndInfo(tabType)
         displayChecklist(tabType)
-        // if (instance){
-        //     if (instance.hasOwnProperty("getAllTodos")){
-        //         currentProjectTodosData = instance.getAllTodos()
-        //         displayCards(currentProjectTodosData)
-        //     } else {
-        //         displayCards() //removes Cards, when there's no need for ones (when entering a todo)
-        //     }
-        //     displayMainTitleAndInfo(instance)
-        //     displayChecklist(instance.checkList)
-        //     removeAndDeactivateSuperfluous(refs.main.lis[3])
-        // } else { //display All projects
-        //     displayMainTitleAndInfo()
-        //     displayCards(projectsData)
-        //     displayChecklist()
-        //     removeAndDeactivateSuperfluous(refs.aside)
-        // }
-        
     }
 
     function displayMainTitleAndInfo(tabTypeDetermined) {
@@ -118,38 +111,19 @@ export const displayControllerWithModule = function(projectModule){
         }
         if (tabTypeDetermined == "project" || tabTypeDetermined == "todo"){
             refs.main.h1.textContent = data.title
-            // if (!refs.main.ul.classList.contains("active")){
-            //     refs.main.ul.classList.add("active")
-            //     refs.main.insertBefore(refs.main.ul, refs.main.h1.nextSibling)
-            // }
-            // if (!refs.main.lis[3].classList.contains("active")){
-            //     refs.main.lis[3].classList.add("active")
-            //     refs.main.ul.appendChild(refs.main.lis[3])
-            // }
             const names = ["Description", "Priority", "Due Date"]
             const content = [data.description, data.priority.name, data.dueDate.formattedDate]
             for (let i=0; i<3; i++){
-                refs.main.lis[i].textContent = `${names[i]}: ${content[i]}`
-                // refs.main.lis[i].classList.add("active")                
+                refs.main.lis[i].textContent = `${names[i]}: ${content[i]}`           
             }
-            // refs.main.lis.forEach((li, index) => {
-            //     li.textContent = `${names[index]}: ${content[index]}`
-            //     li.classList.add("active")
-            // })
         } else if (tabTypeDetermined == "allProjects"){
-            // if (refs.main.ul.classList.contains("active")){
-            //     refs.main.ul.classList.remove("active")
-            //     refs.main.ul.remove()
-            // }
             refs.main.h1.textContent = "My Projects"
         }
     }
 
     function displayCards(tabTypeDetermined){
         let dataArr = []
-        // const chosenTab = determineTabType(instance)
         if (tabTypeDetermined == "project"){
-        // currentProjectTodosData = instance.getAllTodos()
             dataArr = currentProjectTodosData
         } else if (tabTypeDetermined == "allProjects") {
             dataArr = projectsData
@@ -189,24 +163,15 @@ export const displayControllerWithModule = function(projectModule){
 
     function displayChecklist(tabTypeDetermined){
         let dataArr = []
-        // const chosenTab = determineTabType(instance)
         if (tabTypeDetermined == "project"){
-        // currentProjectTodosData = instance.getAllTodos()
             dataArr = currentProject.checkList
-            // appendAndActivate(refs.aside, refs.body)
         } else if (tabTypeDetermined == "allProjects") {
              //No checklist in this tab, skip loop.
-            // removeAndDeactivate(refs.aside)
         } else if (tabTypeDetermined == "todo") {
             dataArr = currentTodo.checkList
-            // appendAndActivate(refs.aside, refs.body)
         } else return
 
 
-        // if (!refs.aside.classList.contains("active")){
-        //     refs.body.appendChild(refs.aside)
-        //     refs.aside.classList.add("active")
-        // }
         dataArr.forEach((item, index) => {
             let li
             if (index < refs.aside.lis.length) {
@@ -225,33 +190,44 @@ export const displayControllerWithModule = function(projectModule){
     }
     // Checklist should be an array of {content, complete} objects.
 
-
-    // function clearMain(){
-    //     const content = document.querySelectorAll("main .active")
-    //     content.forEach((element) => {
-    //         element.classList.remove("active")
-    //         element.remove()
-    //     })
-    // }
-
-    // function clearAside(){
-    //     const content = document.querySelectorAll("aside .active")
-    //     content.forEach((element) => {
-    //         element.classList.remove("active")
-    //         element.remove()
-    //     })
-    // }
-
+    let lastProjectLiDOMRef
     const eventsController = (function(){
-        refs.header.addEventListener("click",(e)=>{
-            if (e.target.classList.contains("my-projects-btn")){
+        function displayTab(tabType, target){
+            if (tabType == "allProjects") {
                 displayMain("allProjects")
                 currentProject = null
                 currentTodo = null
+            } else if (tabType == "project"){
+                const project = projectsData.find(item => item.id == target.dataset.id)
+                displayMain(project)
+                if (lastProjectLiDOMRef && lastProjectLiDOMRef !== target) {
+                    lastProjectLiDOMRef.classList.remove("current-project")
+                }
+                target.classList.add("current-project")
+                lastProjectLiDOMRef = target
+            } else if (tabType == "todo"){
+                const todo = currentProjectTodosData.find(item => item.id == target.dataset.id)
+                displayMain(todo)
+            }
+        }
+        refs.header.addEventListener("click",(e)=>{
+            if (e.target.classList.contains("my-projects-btn")){
+                // displayMain("allProjects")
+                // currentProject = null
+                // currentTodo = null
+                displayTab("allProjects")
                 
             } else if (e.target.hasAttribute("data-id")){
-                const project = projectsData.find(item => item.id == e.target.dataset.id)
-                displayMain(project)
+                // const project = projectsData.find(item => item.id == e.target.dataset.id)
+                // displayMain(project)
+                // if (lastProjectLiDOMRef && lastProjectLiDOMRef !== e.target) {
+                //     lastProjectLiDOMRef.classList.remove("current-project")
+                // }
+                // e.target.classList.add("current-project")
+                // lastProjectLiDOMRef = e.target
+                displayTab("project", e.target)
+            } else if (e.target.classList.contains("add-project-btn")){
+                refs.addWritingEntityDialog.showModal()
             }
         })
         refs.main.addEventListener("click",(e)=>{
@@ -259,11 +235,14 @@ export const displayControllerWithModule = function(projectModule){
             if (!card) return
             if (card.hasAttribute("data-id")){
                 if (refs.main.h1.textContent == "My Projects"){
-                    const project = projectsData.find(item => item.id == card.dataset.id)
-                    displayMain(project)
+                    // const project = projectsData.find(item => item.id == card.dataset.id)
+                    // displayMain(project)
+                    displayTab("project", card)
+
                 } else {
-                    const todo = currentProjectTodosData.find(item => item.id == card.dataset.id)
-                    displayMain(todo)
+                    // const todo = currentProjectTodosData.find(item => item.id == card.dataset.id)
+                    // displayMain(todo)
+                    displayTab("todo", card)
                 }
             }
         })
@@ -283,22 +262,9 @@ export const displayControllerWithModule = function(projectModule){
     }
 
     function removeAndDeactivateSuperfluous(elements, FormerAmountCounter, currentAmountCounter, currentAmountValue){
-        // if (arguments.length == 1){
-        //     if (Array.isArray(elements)){
-        //         elements.forEach(item => {
-        //         item.remove()
-        //         item.classList.remove("active")                    
-        //         })
-        //     } else {
-        //         elements.remove()
-        //         elements.classList.remove("active")
-        //     }
-        // } else {
         currentAmountCounter.counter = currentAmountValue
         if (FormerAmountCounter.counter > currentAmountCounter.counter){
             for (let i=currentAmountCounter.counter; i<FormerAmountCounter.counter; i++){
-                // elements[i].remove()
-                // elements[i].classList.remove("active")
                 removeAndDeactivate(elements[i])
             }
         }
@@ -343,25 +309,6 @@ export const displayControllerWithModule = function(projectModule){
             } else if (tabTypeDetermined == "todo") {
                 removeAndDeactivate(refs.main.addBtn)
             }
-
-            // switch (tabTypeDetermined){
-            //         case "todo":
-            //         case "project": 
-            //         appendAndActivate(refs.main.ul, refs.main, "insertBefore", refs.main.h1.nextSibling)
-            //         appendAndActivate(refs.aside, refs.body)
-            //         console.log(tabTypeDetermined)
-            //     case "project":
-            //         appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.ul.nextSibling)
-            //         break;
-            //     case "allProjects":
-            //         appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.h1.nextSibling)
-            //         removeAndDeactivate(refs.aside)
-            //         break;
-            //     case "todo":
-            //         console.log(tabTypeDetermined)
-            //         removeAndDeactivate(refs.main.addBtn)
-            //         break;
-            // }
         }
         return {determineTabType, setTabVars, adjustDisplayToTabType}
     })()

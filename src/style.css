@@ -72,7 +72,8 @@ header nav.projects-wrapper>ol>li{
 }
 
 header nav.projects-wrapper>ol>li:hover,
-header nav.projects-wrapper>ol>li:active{
+header nav.projects-wrapper>ol>li:active,
+header nav.projects-wrapper>ol>li.current-project{
     background-color: var(--grey9);
 }
 main{

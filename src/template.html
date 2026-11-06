@@ -13,7 +13,7 @@
             <nav class="projects-wrapper">
                 <ol ref="ol" class="projects-ol">
                 </ol>
-                <button>+</button>
+                <button class="add-project-btn">+</button>
             </nav>
         </div>
     </header>
@@ -31,5 +31,36 @@
         <ul>
         </ul>
     </aside>
+    <dialog class="add-project-dialog">
+        <form action="#" method="get" class>
+            <h3>Add Project</h3>
+            <label for="title">Title:</label>
+            <input type="text" name="title" id="title">
+            <label for="description">Description</label>
+            <textarea name="description" id="description" cols="30" rows="10"></textarea>
+            <label for="Priority">Priority</label>
+            <fieldset>
+                <legend>Priority</legend>
+                <input type="radio" name="priority" id="unspecified" value="unspecified">
+                <label for="unspecified">Unspecified</label>
+                <input type="radio" name="priority" id="very-low" value="very-low">
+                <label for="very-low">Very Low</label>
+                <input type="radio" name="priority" id="low" value="low">
+                <label for="low">Low</label>
+                <input type="radio" name="priority" id="middle" value="middle">
+                <label for="middle">Middle</label>
+                <input type="radio" name="priority" id="high" value="high">
+                <label for="high">High</label>
+                <input type="radio" name="priority" id="very-high" value="very-high">
+                <label for="very-high">Very High</label>
+            </fieldset>
+            <label for="due-date">Due Date</label>
+            <input type="datetime-local" name="due-date" id="due-date">
+            <label for="notes"></label>
+            <textarea name="notes" id="notes" cols="30" rows="10"></textarea>
+            <button type="submit">Submit</button>
+            <button type="button">Cancel</button>
+        </form>
+    </dialog>
 </body>
 </html>

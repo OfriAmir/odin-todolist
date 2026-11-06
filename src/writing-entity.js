@@ -7,7 +7,7 @@ export const writingEntity = (function() {
             number: 0,
         },
         {
-            name: "very high",
+            name: "very-high",
             number: 1,
         },
         {
@@ -23,7 +23,7 @@ export const writingEntity = (function() {
             number: 4,
         },   
         {
-            name: "very low",
+            name: "very-low",
             number: 5,
         },
     ]
