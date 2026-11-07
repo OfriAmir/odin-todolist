@@ -10,7 +10,7 @@ export const displayControllerWithModule = function(projectModule){
         header: document.querySelector("header"),
         main: document.querySelector("main"),
         aside: document.querySelector("aside"),
-        addWritingEntityDialog: document.querySelector("dialog.add-project-dialog")
+        addWritingEntityDialog: document.querySelector("dialog.add-writing-entity-dialog")
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
@@ -29,9 +29,11 @@ export const displayControllerWithModule = function(projectModule){
     refs.aside.ul = document.querySelector("aside>ul")
     refs.aside.lis = []
 
+    refs.addWritingEntityDialog.form = refs.addWritingEntityDialog.querySelector("form")
+    refs.addWritingEntityDialog.h3 = refs.addWritingEntityDialog.querySelector("h3")
     refs.addWritingEntityDialog.titleInput = refs.addWritingEntityDialog.querySelector("input[id=title]")
     refs.addWritingEntityDialog.descriptionInput = refs.addWritingEntityDialog.querySelector("textarea[id=description]")
-    refs.addWritingEntityDialog.priorityInputs = refs.addWritingEntityDialog.querySelector("fieldset>input[type=radio]")
+    refs.addWritingEntityDialog.priorityInputs = [...refs.addWritingEntityDialog.querySelectorAll("fieldset>input[type=radio]")]
     refs.addWritingEntityDialog.dueDateInput = refs.addWritingEntityDialog.querySelector("input[id=due-date]")
     refs.addWritingEntityDialog.notesInput = refs.addWritingEntityDialog.querySelector("textarea[id=notes]")
     refs.addWritingEntityDialog.submitBtn = refs.addWritingEntityDialog.querySelector("button[type=submit]")
@@ -99,7 +101,7 @@ export const displayControllerWithModule = function(projectModule){
         tabs.adjustDisplayToTabType(tabType)
         displayCards(tabType)
         displayMainTitleAndInfo(tabType)
-        displayChecklist(tabType)
+        displayCheckList(tabType)
     }
 
     function displayMainTitleAndInfo(tabTypeDetermined) {
@@ -161,12 +163,12 @@ export const displayControllerWithModule = function(projectModule){
         removeAndDeactivateSuperfluous(refs.main.divs, formerActive.main.divs, currentActive.main.divs, dataArr.length)
     }
 
-    function displayChecklist(tabTypeDetermined){
+    function displayCheckList(tabTypeDetermined){
         let dataArr = []
         if (tabTypeDetermined == "project"){
             dataArr = currentProject.checkList
         } else if (tabTypeDetermined == "allProjects") {
-             //No checklist in this tab, skip loop.
+             //No checkList in this tab, skip loop.
         } else if (tabTypeDetermined == "todo") {
             dataArr = currentTodo.checkList
         } else return
@@ -188,7 +190,7 @@ export const displayControllerWithModule = function(projectModule){
         })
         removeAndDeactivateSuperfluous(refs.aside.lis, formerActive.aside.lis, currentActive.aside.lis, dataArr.length)
     }
-    // Checklist should be an array of {content, complete} objects.
+    // CheckList should be an array of {content, complete} objects.
 
     let lastProjectLiDOMRef
     const eventsController = (function(){
@@ -245,6 +247,27 @@ export const displayControllerWithModule = function(projectModule){
                     displayTab("todo", card)
                 }
             }
+        })
+        refs.addWritingEntityDialog.addEventListener("click", (e) => {
+            if (e.target.matches("[type=button]")){
+                refs.addWritingEntityDialog.close()
+            } else if (e.target.matches("[type=submit]")) {
+                e.preventDefault
+                const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked"))
+                if (refs.addWritingEntityDialog.h3.textContent == "Add Project"){
+                    projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                    displayProjectsNav()
+                    if (!currentProject) {
+                        displayTab("allProjects")
+                    }
+                } else if (refs.addWritingEntityDialog.h3.textContent == "Add Todo") {
+                    projectModule.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                    displayTab(currentProject)
+                }
+                refs.addWritingEntityDialog.close()
+                refs.addWritingEntityDialog.form.reset()
+
+            }       
         })
     })()
     function appendAndActivate(element, parentElement, insertBefore, siblingElement){
