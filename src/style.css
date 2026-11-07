@@ -79,8 +79,36 @@ header nav.projects-wrapper>ol>li.current-project{
 main{
     display: grid;
     justify-items: center;
-    padding: 0 35%;
-    /* position: relative; */
+    padding: 24px 35%;
+    position: relative;
+}
+
+/* main>div.title {
+    position: relative;
+} */
+main>button.options-btn{
+    width: 15px;
+    height: 15px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background-color: inherit;
+    background-image: url(menu-dots-vertical.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 10% 0;
+    display: inline;
+    position: absolute;
+    right: 35%;
+    top: 11px;
+}
+
+main>button.menu-btn:hover{
+    background-color: var(--grey9);
+}
+
+main>h1 {
+    margin-top: 0;
 }
 main>*{
     margin-top: 24px;
@@ -192,6 +220,10 @@ form.add-writing-entity-form>div.btns-wrapper>button{
     border-radius: 8px;
     cursor: pointer;
 
+}
+
+dialog.optionsDialog>button.marked{
+    background-color: aquamarine;
 }
 /* [hidden] {
     display: none !important;
