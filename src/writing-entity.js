@@ -30,9 +30,9 @@ export const writingEntity = (function() {
     const defaultPriorityOptions = ["unspecified", "very-low", "low", "medium", "high", "very-high"]
     function defaultSort(Arr) {
         Arr.sort((a,b) => {
-            const criteria1 = defaultPriorityOptions.indexOf(a.priority) - defaultPriorityOptions.indexOf(a.priority)
+            const criteria1 = a.priority - b.priority
             if (criteria1 != 0) return criteria1         
-            else if (a.dueDate.date || b.dueDate.date){
+            if (a.dueDate.date || b.dueDate.date){
                 let criteria2
                 if (a.dueDate.date && !b.dueDate.date) criteria2 = 1
                 else if (!a.dueDate.date && b.dueDate.date) criteria2 = -1
@@ -41,10 +41,9 @@ export const writingEntity = (function() {
                     const criteria3 = compareAsc(a.dueDate.date, b.dueDate.date)
                     if (criteria3 != 0) return criteria3
                 }
-            } else {
-                const criteria4 = compareAsc(a.creationDate, b.creationDate)
-                return criteria4
-            } 
+            }
+            const criteria4 = compareAsc(a.creationDate, b.creationDate)
+            return criteria4 
         })
     }
     function createInstance(){
@@ -57,7 +56,7 @@ export const writingEntity = (function() {
             formattedDate: format(now,"HH:mm MMMM do, y"),
         }
         _id = crypto.randomUUID()
-        _priority = defaultPriorityOptions[0]
+        _priority = 0
         _dueDate = {
             date: null,
             formattedDate: null,
@@ -65,9 +64,117 @@ export const writingEntity = (function() {
         _checkList = []
         return {_title, _description, _creationDate, _id, _priority, _dueDate, _notes, _checkList, _complete, _pin}
     }
+    function addGettersAndSettersToInstance (entity, entitiesArr) {
+        Object.defineProperties(entity,{
+            title: {
+                set(data){
+                    this._title = data
+                },
+                get(){
+                    return this._title
+                }
+            },
+
+            description: {
+                set(data){
+                    this._description = data
+                },
+                get(){
+                    return this._description
+                }
+            },
+
+            creationDate: {
+                get(){
+                    return this._creationDate.formattedDate
+                }
+            },
+
+            id: {
+                get(){
+                    return this._id
+                }
+            },
+
+            priority: {
+                // set(priorityType){
+                //     this._priority = writingEntity.defaultPriorityOptions.indexOf(priorityType)
+                //     writingEntity.defaultSort(entitiesArr)
+                // },
+                set(num){
+                    this._priority = num
+                    writingEntity.defaultSort(entitiesArr)
+                },
+                get(){
+                    return this._priority
+                }
+            },
+            
+            dueDate: {
+                set(date){
+                    if (date){
+                        this._dueDate.date = date
+                        this._dueDate.formattedDate = format(date,"HH:mm MMMM do, y")
+                        writingEntity.defaultSort(entitiesArr);
+                    }
+                },
+                get(){
+                    return this._dueDate
+                }
+            },
+
+            notes: {
+                set(data){
+                    this._notes = data
+                },
+                get(){
+                    return this._notes
+                }
+            },
+
+            addTocheckList: {
+                value: function(data) {
+                    const fullData = {content: data, complete: false}
+                    this._checkList.push(fullData)
+                },
+                // set(data){
+                //     this._checkList.push(data)
+                // },
+                // get(){
+                //     return this._checkList
+                // }
+            },
+            
+            checkList: {
+                get(){
+                    return this._checkList
+                }
+            },
+
+            complete: {
+                set(data){
+                    //should only be boolean, but I don't think I need to validate it here if there will be only one way to interact with it in the UI... 
+                    this._complete = data
+                },
+                get(){
+                    return this._complete
+                }
+            },
+
+            pin: {
+                set(data){
+                    //should only be boolean
+                    this._pin = data
+                },
+                get(){
+                    return this._pin
+                }
+            },
+        })
+    }
     function addInstanceToArr(instance, arr){
         arr.push(instance);
         if (arr.length > 1) writingEntity.defaultSort(arr);
     }
-    return {defaultPriorityOptions, defaultSort, createInstance, addInstanceToArr}
+    return {defaultPriorityOptions, defaultSort, createInstance, addGettersAndSettersToInstance, addInstanceToArr}
 })()

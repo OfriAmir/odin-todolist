@@ -1,11 +1,20 @@
 import { format } from "date-fns"
-// import { writingEntity } from "./writing-entity.js"
+import { writingEntity as writingEntityModule } from "./writing-entity.js"
+// This application uses class "active" to determine whether a DOM object is visible or not. This method makes it very easy to tweak the logic, by using DevTools.
+// The right method is to store this informatiion in internal variables inside the script, but I didn't think about it at first.
+// So as long as I don't fix this, just know that this is a major risk and that this app isn't ready to use.
+// Also, you should generally store the logic on a server so that it will be even harder to access it.
+
+
 
 export const displayControllerWithModule = function(projectModule){
     const projectsData = projectModule.getAllProjects()
+    const defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
     let currentProjectTodosData
     let currentProject
     let currentTodo
+    let currentTabType
+    let currentDialogType
     const refs = {
         body: document.querySelector("body"),
         header: document.querySelector("header"),
@@ -16,7 +25,7 @@ export const displayControllerWithModule = function(projectModule){
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
-    refs.header.myProjectBtn = document.querySelector("header .my-projects-btn")
+    refs.header.myProjectsBtn = document.querySelector("header .my-projects-btn")
     refs.header.addPro
 
     // refs.main.titleDiv = document.querySelector("main>div.title")
@@ -120,9 +129,12 @@ export const displayControllerWithModule = function(projectModule){
         if (tabTypeDetermined == "project" || tabTypeDetermined == "todo"){
             refs.main.h1.textContent = data.title
             const names = ["Description", "Priority", "Due Date"]
-            const content = [data.description, data.priority.name, data.dueDate.formattedDate]
+            const description = data.description ? data.description : ""
+            const priority =  data.priority !== 0 ? defaultPriorityOptions[data.priority] : ""
+            const dueDate = data.dueDate.formattedDate ? data.dueDate.formattedDate : ""
+            const contents = [description, priority, dueDate]
             for (let i=0; i<3; i++){
-                refs.main.lis[i].textContent = `${names[i]}: ${content[i]}`           
+                refs.main.lis[i].textContent = `${names[i]}: ${contents[i]}`           
             }
         } else if (tabTypeDetermined == "allProjects"){
             refs.main.h1.textContent = "My Projects"
@@ -161,9 +173,12 @@ export const displayControllerWithModule = function(projectModule){
                 div.classList.add("active")
             }
             const names = ["Description", "Priority", "Due Date"]
-            const content = [card.description, card.priority.name, card.dueDate.formattedDate]
+            const description = card.description ? card.description : ""
+            const priority =  card.priority !== 0 ? defaultPriorityOptions[card.priority] : ""
+            const dueDate = card.dueDate.formattedDate ? card.dueDate.formattedDate : ""
+            const contents = [description, priority, dueDate]
             div.lis.forEach((li, index) => {
-                li.textContent = `${names[index]}: ${content[index]}`
+                li.textContent = `${names[index]}: ${contents[index]}`
             })
         })
         removeAndDeactivateSuperfluous(refs.main.divs, formerActive.main.divs, currentActive.main.divs, dataArr.length)
@@ -196,36 +211,70 @@ export const displayControllerWithModule = function(projectModule){
         })
         removeAndDeactivateSuperfluous(refs.aside.lis, formerActive.aside.lis, currentActive.aside.lis, dataArr.length)
     }
-    // CheckList should be an array of {content, complete} objects.
 
+    // CheckList should be an array of {content, complete} objects.
     let lastProjectLiDOMRef 
-    let editing // True when addWritingEntityDialog is shown to edit an existing entity rather than adding one
+    // let editing // True when addWritingEntityDialog is shown to edit an existing entity rather than adding one
     const eventsController = (function(){
-        function displayTab(tabType, target){
-            if (tabType == "allProjects") {
-                displayMain("allProjects")
-            } else if (tabType == "project"){
+        
+        function displayMainFromTarget(tabType, target){
+            // if (tabType == "allProjects") {
+            //     displayMain("allProjects")
+            // } else
+            if (tabType == "project"){
                 const project = projectsData.find(item => item.id == target.dataset.id)
                 displayMain(project)
 
                 //mainly for making the current project's tab have a different color.
-                if (lastProjectLiDOMRef && lastProjectLiDOMRef !== target) {
-                    lastProjectLiDOMRef.classList.remove("current-project")
-                }
-                target.classList.add("current-project")
-                lastProjectLiDOMRef = target
+                // if (lastProjectLiDOMRef && lastProjectLiDOMRef !== target) {
+                //     lastProjectLiDOMRef.classList.remove("current-project")
+                // }
+                // target.classList.add("current-project")
+                // lastProjectLiDOMRef = target
 
             } else if (tabType == "todo"){
                 const todo = currentProjectTodosData.find(item => item.id == target.dataset.id)
                 displayMain(todo)
             }
         }
+        function showAddWritingEntityDialog(type) {
+            let types = ["edit project", "add project", "edit todo", "add todo"]
+            if (types.includes(type)){
+                if (type == types[0]) refs.addWritingEntityDialog.h3.textContent = "Edit Project"
+                else if (type == types[1]) refs.addWritingEntityDialog.h3.textContent = "Add Project"
+                else if (type == types[2]) refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
+                else if (type == types[3]) refs.addWritingEntityDialog.h3.textContent = "Add Todo"
+            }
+            currentDialogType = type
+            // function setTypeVar(typeStr) {
+            //     currentDialogType = typeStr
+            // }
+            // if (tabType == "project"){
+            //     if (editing) {
+            //         refs.addWritingEntityDialog.h3.textContent = "Edit Project"
+            //         setTypeVar("edit project")
+            //     } else {
+            //         refs.addWritingEntityDialog.h3.textContent = "Add Project"
+            //         setTypeVar("add project")
+            //     }
+            // } else if (tabType == "todo"){
+            //     if (editing) {
+            //         refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
+            //         setTypeVar("edit todo")
+            //     } else {
+            //         refs.addWritingEntityDialog.h3.textContent = "Add Todo"
+            //         setTypeVar("add todo")
+            //     }
+            // }
+            refs.addWritingEntityDialog.showModal()
+
+        }
         refs.header.addEventListener("click",(e)=>{
             if (e.target.classList.contains("my-projects-btn")){
                 // displayMain("allProjects")
                 // currentProject = null
                 // currentTodo = null
-                displayTab("allProjects")
+                displayMain("allProjects")
                 
             } else if (e.target.hasAttribute("data-id")){
                 // const project = projectsData.find(item => item.id == e.target.dataset.id)
@@ -235,60 +284,69 @@ export const displayControllerWithModule = function(projectModule){
                 // }
                 // e.target.classList.add("current-project")
                 // lastProjectLiDOMRef = e.target
-                displayTab("project", e.target)
+                displayMainFromTarget("project", e.target)
             } else if (e.target.classList.contains("add-project-btn")){
-                refs.addWritingEntityDialog.h3.textContent = "Add Project"
-                refs.addWritingEntityDialog.showModal()
+                showAddWritingEntityDialog("add project")
             }
         })
         refs.main.addEventListener("click",(e)=>{
             const card = e.target.closest(".card")
             if (!card) return
             if (card.hasAttribute("data-id")){
-                if (refs.main.h1.textContent == "My Projects"){
+                if (currentTabType == "allProjects"){
                     // const project = projectsData.find(item => item.id == card.dataset.id)
                     // displayMain(project)
-                    displayTab("project", card)
+                    displayMainFromTarget("project", card)
 
-                } else {
+                } else if (currentTabType == "project") {
                     // const todo = currentProjectTodosData.find(item => item.id == card.dataset.id)
                     // displayMain(todo)
-                    displayTab("todo", card)
+                    displayMainFromTarget("todo", card)
                 }
             }
         })
         refs.main.addBtn.addEventListener("click", (e) => {
-            if (currentProject){ // project tab
-                refs.addWritingEntityDialog.h3.textContent = "Add Todo"
-            } else { // allProjects tab
-                refs.addWritingEntityDialog.h3.textContent = "Add Project"
-            } 
-            refs.addWritingEntityDialog.showModal()
+            if (currentTabType == "project") showAddWritingEntityDialog("add todo")
+            else showAddWritingEntityDialog("add project")
         })
 
         refs.main.optionsBtn.addEventListener("click", (e) => {
             refs.optionsDialog.showModal()
         })
-        refs.addWritingEntityDialog.addEventListener("click", (e) => {
-            if (e.target.matches("[type=button]")){
-                refs.addWritingEntityDialog.close()
-            } else if (e.target.matches("[type=submit]")) {
-                e.preventDefault
-                const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked"))
-                if (refs.addWritingEntityDialog.h3.textContent == "Add Project"){
-                    projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
-                    displayProjectsNav()
-                    if (!currentProject) {
-                        displayTab("allProjects")
-                    }
-                } else if (refs.addWritingEntityDialog.h3.textContent == "Add Todo") {
-                    projectModule.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
-                    displayTab(currentProject)
+        refs.addWritingEntityDialog.form.addEventListener("submit", (e) => {
+            e.preventDefault
+            const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked")).value
+            console.log(priorityValue)
+            if (currentDialogType == "add project"){
+                projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                displayProjectsNav()
+                if (currentTabType == "allProjects") {
+                    displayMain("allProjects")
                 }
-                refs.addWritingEntityDialog.close()
-                refs.addWritingEntityDialog.form.reset()
+                console.log(projectsData)
+                
 
-            }       
+            } else if (currentDialogType == "add todo") {
+                currentProject.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                displayMain(currentProject)//????????????????/
+
+            } else if (currentDialogType == "edit project" || currentDialogType == "edit todo"){
+                let writingEntity
+                if (currentDialogType == "edit project") writingEntity = currentProject
+                else writingEntity = currentTodo
+                writingEntity.title = refs.addWritingEntityDialog.titleInput.value
+                writingEntity.description = refs.addWritingEntityDialog.descriptionInput.value
+                writingEntity.priority = priorityValue
+                writingEntity.dueDate = refs.addWritingEntityDialog.dueDateInput.value
+                writingEntity.notes = refs.addWritingEntityDialog.notesInput.value
+                displayMain(writingEntity)//????????????????????
+            }
+            refs.addWritingEntityDialog.close()
+            refs.addWritingEntityDialog.form.reset()
+        })
+
+        refs.addWritingEntityDialog.cancelBtn.addEventListener("click", (e) => {
+            refs.addWritingEntityDialog.close()     
         })
 
         refs.optionsDialog.addEventListener("click", (e) => {
@@ -332,19 +390,26 @@ export const displayControllerWithModule = function(projectModule){
                 }
 
             } else if (e.target.textContent == "Edit") {
-                    editing = true
-                    if (currentTodo){
-                        refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
+                    // editing = true
+                    // if (currentTodo){
+                    //     refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
                         
-                    } 
-                    else refs.addWritingEntityDialog.h3.textContent = "Edit Project"
+                    // } 
+                    // else refs.addWritingEntityDialog.h3.textContent = "Edit Project"
                     refs.addWritingEntityDialog.titleInput.value = writingEntity.title
                     refs.addWritingEntityDialog.descriptionInput.value = writingEntity.description
                     refs.addWritingEntityDialog.notesInput.value = writingEntity.notes
+                    
+                    for (let ref of refs.addWritingEntityDialog.priorityInputs) {
+
+                    }
                     // Add selected radio button here
                     refs.addWritingEntityDialog.dueDateInput.value = writingEntity.dueDate.date
-                    refs.addWritingEntityDialog.showModal()
+                    if (currentTabType == "project") showAddWritingEntityDialog("edit project")
+                    else if (currentTabType == "todo") showAddWritingEntityDialog("edit todo")
+                    // editing = false
                 }
+            refs.optionsDialog.close()
         })
     })()
     function appendAndActivate(element, parentElement, insertBefore, siblingElement){
@@ -387,14 +452,17 @@ export const displayControllerWithModule = function(projectModule){
         function setTabVars(instance, tabTypeDetermined){
             switch (tabTypeDetermined){
                 case "todo":
+                    currentTabType = "todo"
                     currentTodo = instance
                     break;
                 case "project":
+                    currentTabType = "project"
                     currentTodo = null
                     currentProject = instance
                     currentProjectTodosData = instance.getAllTodos()
                     break;
                 case "allProjects":
+                    currentTabType = "allProjects"
                     currentProject = null
                     currentTodo = null
             }
@@ -404,15 +472,24 @@ export const displayControllerWithModule = function(projectModule){
             if (tabTypeDetermined == "todo" || tabTypeDetermined == "project"){
                 appendAndActivate(refs.main.ul, refs.main, "insertBefore", refs.main.h1.nextSibling)
                 appendAndActivate(refs.aside, refs.body)
+                appendAndActivate(refs.main.optionsBtn, refs.main, "insertBefore", refs.main.h1)
             }
             if (tabTypeDetermined == "project") {
-               appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.ul.nextSibling)
-               refs.main.addBtn.textContent = "Add Todo"
+                if (lastProjectLiDOMRef) lastProjectLiDOMRef.classList.remove("current-project")
+                const currentProjectLi = refs.header.lis.find(element => element.dataset.id === currentProject.id)
+                currentProjectLi.classList.add("current-project")
+                lastProjectLiDOMRef = currentProjectLi
+                appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.ul.nextSibling)
+                refs.main.addBtn.textContent = "Add Todo"
             } else if (tabTypeDetermined == "allProjects") {
                 appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.h1.nextSibling)
                 removeAndDeactivate(refs.aside)
                 removeAndDeactivate(refs.main.ul)
+                removeAndDeactivate(refs.main.optionsBtn)
                 refs.main.addBtn.textContent = "Add Project"
+                if (lastProjectLiDOMRef){
+                    lastProjectLiDOMRef.classList.remove("current-project")
+                }
             } else if (tabTypeDetermined == "todo") {
                 removeAndDeactivate(refs.main.addBtn)
             }

@@ -10,7 +10,7 @@ import {displayControllerWithModule} from "./display-controller.js"
     myProject1.addTocheckList("Do Your Todos")
     const displayController = displayControllerWithModule(project)
     displayController.displayProjectsNav()
-    displayController.displayMain(myProject1)
+    displayController.displayMain("allProjects")
     // displayController.clearMain()
 })()
 
