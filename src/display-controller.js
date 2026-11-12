@@ -8,27 +8,74 @@ import { writingEntity as writingEntityModule } from "./writing-entity.js"
 
 
 export const displayControllerWithModule = function(projectModule){
-    const projectsData = projectModule.getAllProjects()
-    const defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
-    let currentProjectTodosData
-    let currentProject
-    let currentTodo
-    let currentTabType
-    let currentDialogType
+    const caches = (function(){
+        const projectsData = projectModule.getAllProjects()
+        const defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
+        let currentProjectTodosData
+        let currentProject
+        let currentTodo
+        let currentTabType
+        let currentDialogType
+        let currentActive = {
+            header: {
+                lis: {
+                    counter: 0 
+                } 
+            },
+            main: {
+                divs: {
+                    counter: 0
+                }
+            },
+            aside: {
+                lis: {
+                    counter: 0
+                } 
+            },
+        }
+
+        let formerActive = {
+            header: {
+                lis: {
+                    counter: 0
+                } 
+            },
+            main: {
+                divs: {
+                    counter: 0
+                } 
+            },
+            aside: {
+                lis: {
+                    counter: 0
+                } 
+            },
+        }
+        let lastProjectLiDOMRef
+        return {projectsData, defaultPriorityOptions, currentProjectTodosData, currentProject, currentTodo, currentTabType, currentDialogType, currentActive, formerActive, lastProjectLiDOMRef}
+    })()
+    // const caches.projectsData = projectModule.getAllProjects()
+    // const caches.defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
+    // let caches.currentProjectTodosData
+    // let currentProject
+    // let caches.currentTodo
+    // let caches.currentTabType
+    // let caches.currentDialogType
     const refs = {
         body: document.querySelector("body"),
         header: document.querySelector("header"),
         main: document.querySelector("main"),
         aside: document.querySelector("aside"),
         addWritingEntityDialog: document.querySelector("dialog.add-writing-entity-dialog"),
-        optionsDialog: document.querySelector("dialog.options-dialog")
+        optionsDialog: document.querySelector("dialog.options-dialog"),
+        infoDialog: document.querySelector("dialog.info-dialog"),
+        removalDialog: document.querySelector("dialog.removal-dialog")
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
     refs.header.myProjectsBtn = document.querySelector("header .my-projects-btn")
     refs.header.addPro
 
-    // refs.main.titleDiv = document.querySelector("main>div.title")
     refs.main.optionsBtn = document.querySelector("main>button.options-btn")
     refs.main.h1 = document.querySelector("main>h1")
     refs.main.ul = document.querySelector("main>ul")
@@ -41,6 +88,7 @@ export const displayControllerWithModule = function(projectModule){
     refs.aside.h2 = document.querySelector("aside>h2")
     refs.aside.ul = document.querySelector("aside>ul")
     refs.aside.lis = []
+    refs.aside.textSpans = []
 
     refs.addWritingEntityDialog.form = refs.addWritingEntityDialog.querySelector("form")
     refs.addWritingEntityDialog.h3 = refs.addWritingEntityDialog.querySelector("h3")
@@ -52,47 +100,65 @@ export const displayControllerWithModule = function(projectModule){
     refs.addWritingEntityDialog.submitBtn = refs.addWritingEntityDialog.querySelector("button[type=submit]")
     refs.addWritingEntityDialog.cancelBtn = refs.addWritingEntityDialog.querySelector("button[type=button]")
 
-    refs.optionsDialog.pinBtn = refs.optionsDialog.querySelector("button.pinBtn")
-    refs.optionsDialog.pinByPriorityBtn = refs.optionsDialog.querySelector("button.pinByPriorityBtn")
 
-    let currentActive = {
-        header: {
-            lis: {
-                counter: 0 
-            } 
-        },
-        main: {
-            divs: {
-                counter: 0
-            }
-        },
-        aside: {
-            lis: {
-                counter: 0
-            } 
-        },
-    }
+    refs.optionsDialog.options = [...refs.optionsDialog.querySelectorAll("button")];
+    refs.optionsDialog.complete = refs.optionsDialog.options[0]
+    refs.optionsDialog.pin = refs.optionsDialog.options[1]
+    refs.optionsDialog.pinByPriority = refs.optionsDialog.options[2]
+    refs.optionsDialog.edit = refs.optionsDialog.options[3]
+    refs.optionsDialog.info = refs.optionsDialog.options[4]
+    refs.optionsDialog.removeBtn = refs.optionsDialog.options[5]
+    // [refs.optionsDialog.complete, refs.optionsDialog.pin, refs.optionsDialog.pinByPriority, refs.optionsDialog.edit, refs.optionsDialog.info, refs.optionsDialog, refs.optionsDialog.removeBtn] = [...refs.optionsDialog.querySelectorAll("button")]
+    // refs.optionsDialog.pinBtn = refs.optionsDialog.querySelector("button.pinBtn")
+    // refs.optionsDialog.pinByPriorityBtn = refs.optionsDialog.querySelector("button.pinByPriorityBtn")
 
-    let formerActive = {
-        header: {
-            lis: {
-                counter: 0
-            } 
-        },
-        main: {
-            divs: {
-                counter: 0
-            } 
-        },
-        aside: {
-            lis: {
-                counter: 0
-            } 
-        },
-    }
+    refs.infoDialog.cancelBtn = refs.infoDialog.querySelector("button.cancel-button")
+    refs.infoDialog.lis = [...refs.infoDialog.querySelectorAll("li")]
+    refs.infoDialog.creationDate = refs.infoDialog.lis[0]
+    refs.infoDialog.notes = refs.infoDialog.lis[1]
+
+    refs.removalDialog.btns = [...refs.removalDialog.querySelectorAll("button")]
+    refs.removalDialog.cancelBtn = refs.removalDialog.btns[0]
+    refs.removalDialog.deleteBtn = refs.removalDialog.btns[1]
+
+    // let currentActive = {
+    //     header: {
+    //         lis: {
+    //             counter: 0 
+    //         } 
+    //     },
+    //     main: {
+    //         divs: {
+    //             counter: 0
+    //         }
+    //     },
+    //     aside: {
+    //         lis: {
+    //             counter: 0
+    //         } 
+    //     },
+    // }
+
+    // let formerActive = {
+    //     header: {
+    //         lis: {
+    //             counter: 0
+    //         } 
+    //     },
+    //     main: {
+    //         divs: {
+    //             counter: 0
+    //         } 
+    //     },
+    //     aside: {
+    //         lis: {
+    //             counter: 0
+    //         } 
+    //     },
+    // }
 
     function displayProjectsNav(){
-        projectsData.forEach((project, index)=> {
+        caches.projectsData.forEach((project, index)=> {
             let li
             if (index < refs.header.lis.length) li = refs.header.lis[index]
             else {
@@ -106,7 +172,7 @@ export const displayControllerWithModule = function(projectModule){
                 li.classList.add("active")
             }
         });
-        removeAndDeactivateSuperfluous(refs.header.lis, formerActive.header.lis, currentActive.header.lis, projectsData.length)
+        removeAndDeactivateSuperfluous(refs.header.lis, caches.formerActive.header.lis, caches.currentActive.header.lis, caches.projectsData.length)
     }
 
     
@@ -122,15 +188,15 @@ export const displayControllerWithModule = function(projectModule){
     function displayMainTitleAndInfo(tabTypeDetermined) {
         let data
         if (tabTypeDetermined == "project"){
-            data = currentProject
+            data = caches.currentProject
         } else if (tabTypeDetermined == "todo"){
-            data = currentTodo
+            data = caches.currentTodo
         }
         if (tabTypeDetermined == "project" || tabTypeDetermined == "todo"){
             refs.main.h1.textContent = data.title
             const names = ["Description", "Priority", "Due Date"]
             const description = data.description ? data.description : ""
-            const priority =  data.priority !== 0 ? defaultPriorityOptions[data.priority] : ""
+            const priority =  data.priority !== 0 ? caches.defaultPriorityOptions[data.priority] : ""
             const dueDate = data.dueDate.formattedDate ? data.dueDate.formattedDate : ""
             const contents = [description, priority, dueDate]
             for (let i=0; i<3; i++){
@@ -144,9 +210,9 @@ export const displayControllerWithModule = function(projectModule){
     function displayCards(tabTypeDetermined){
         let dataArr = []
         if (tabTypeDetermined == "project"){
-            dataArr = currentProjectTodosData
+            dataArr = caches.currentProjectTodosData
         } else if (tabTypeDetermined == "allProjects") {
-            dataArr = projectsData
+            dataArr = caches.projectsData
         } else if (tabTypeDetermined == "todo") {
             //skip the loop, no need for cards
         } else return //don't accept other types.
@@ -174,244 +240,59 @@ export const displayControllerWithModule = function(projectModule){
             }
             const names = ["Description", "Priority", "Due Date"]
             const description = card.description ? card.description : ""
-            const priority =  card.priority !== 0 ? defaultPriorityOptions[card.priority] : ""
+            const priority =  card.priority !== 0 ? caches.defaultPriorityOptions[card.priority] : ""
             const dueDate = card.dueDate.formattedDate ? card.dueDate.formattedDate : ""
             const contents = [description, priority, dueDate]
             div.lis.forEach((li, index) => {
                 li.textContent = `${names[index]}: ${contents[index]}`
             })
         })
-        removeAndDeactivateSuperfluous(refs.main.divs, formerActive.main.divs, currentActive.main.divs, dataArr.length)
+        removeAndDeactivateSuperfluous(refs.main.divs, caches.formerActive.main.divs, caches.currentActive.main.divs, dataArr.length)
     }
 
     function displayCheckList(tabTypeDetermined){
         let dataArr = []
         if (tabTypeDetermined == "project"){
-            dataArr = currentProject.checkList
+            dataArr = caches.currentProject.checkList
         } else if (tabTypeDetermined == "allProjects") {
              //No checkList in this tab, skip loop.
         } else if (tabTypeDetermined == "todo") {
-            dataArr = currentTodo.checkList
+            dataArr = caches.currentTodo.checkList
         } else return
 
 
         dataArr.forEach((item, index) => {
             let li
+            let completeBtn
+            let textSpan
             if (index < refs.aside.lis.length) {
                 li = refs.aside.lis[index]
+                textSpan = refs.aside.textSpans[index]
             } else {
                 li = document.createElement("li")
                 refs.aside.lis.push(li)
+                textSpan = document.createElement("span")
+                textSpan.classList.add("text-span")
+                refs.aside.textSpans.push(textSpan)
+                completeBtn = document.createElement("button")
+                completeBtn.classList.add("complete-btn")
+                li.appendChild(textSpan)
+                li.appendChild(completeBtn)
             }
-            li.textContent = item.content
+            
             if (!li.classList.contains("active")){
                 refs.aside.ul.appendChild(li)
                 li.classList.add("active")
+                
+                // if (completeBtn) li.appendChild(completeBtn)
+                textSpan.textContent = item.content
             }
         })
-        removeAndDeactivateSuperfluous(refs.aside.lis, formerActive.aside.lis, currentActive.aside.lis, dataArr.length)
+        removeAndDeactivateSuperfluous(refs.aside.lis, caches.formerActive.aside.lis, caches.currentActive.aside.lis, dataArr.length)
     }
 
     // CheckList should be an array of {content, complete} objects.
-    let lastProjectLiDOMRef 
-    // let editing // True when addWritingEntityDialog is shown to edit an existing entity rather than adding one
-    const eventsController = (function(){
-        
-        function displayMainFromTarget(tabType, target){
-            // if (tabType == "allProjects") {
-            //     displayMain("allProjects")
-            // } else
-            if (tabType == "project"){
-                const project = projectsData.find(item => item.id == target.dataset.id)
-                displayMain(project)
-
-                //mainly for making the current project's tab have a different color.
-                // if (lastProjectLiDOMRef && lastProjectLiDOMRef !== target) {
-                //     lastProjectLiDOMRef.classList.remove("current-project")
-                // }
-                // target.classList.add("current-project")
-                // lastProjectLiDOMRef = target
-
-            } else if (tabType == "todo"){
-                const todo = currentProjectTodosData.find(item => item.id == target.dataset.id)
-                displayMain(todo)
-            }
-        }
-        function showAddWritingEntityDialog(type) {
-            let types = ["edit project", "add project", "edit todo", "add todo"]
-            if (types.includes(type)){
-                if (type == types[0]) refs.addWritingEntityDialog.h3.textContent = "Edit Project"
-                else if (type == types[1]) refs.addWritingEntityDialog.h3.textContent = "Add Project"
-                else if (type == types[2]) refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
-                else if (type == types[3]) refs.addWritingEntityDialog.h3.textContent = "Add Todo"
-            }
-            currentDialogType = type
-            // function setTypeVar(typeStr) {
-            //     currentDialogType = typeStr
-            // }
-            // if (tabType == "project"){
-            //     if (editing) {
-            //         refs.addWritingEntityDialog.h3.textContent = "Edit Project"
-            //         setTypeVar("edit project")
-            //     } else {
-            //         refs.addWritingEntityDialog.h3.textContent = "Add Project"
-            //         setTypeVar("add project")
-            //     }
-            // } else if (tabType == "todo"){
-            //     if (editing) {
-            //         refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
-            //         setTypeVar("edit todo")
-            //     } else {
-            //         refs.addWritingEntityDialog.h3.textContent = "Add Todo"
-            //         setTypeVar("add todo")
-            //     }
-            // }
-            refs.addWritingEntityDialog.showModal()
-
-        }
-        refs.header.addEventListener("click",(e)=>{
-            if (e.target.classList.contains("my-projects-btn")){
-                // displayMain("allProjects")
-                // currentProject = null
-                // currentTodo = null
-                displayMain("allProjects")
-                
-            } else if (e.target.hasAttribute("data-id")){
-                // const project = projectsData.find(item => item.id == e.target.dataset.id)
-                // displayMain(project)
-                // if (lastProjectLiDOMRef && lastProjectLiDOMRef !== e.target) {
-                //     lastProjectLiDOMRef.classList.remove("current-project")
-                // }
-                // e.target.classList.add("current-project")
-                // lastProjectLiDOMRef = e.target
-                displayMainFromTarget("project", e.target)
-            } else if (e.target.classList.contains("add-project-btn")){
-                showAddWritingEntityDialog("add project")
-            }
-        })
-        refs.main.addEventListener("click",(e)=>{
-            const card = e.target.closest(".card")
-            if (!card) return
-            if (card.hasAttribute("data-id")){
-                if (currentTabType == "allProjects"){
-                    // const project = projectsData.find(item => item.id == card.dataset.id)
-                    // displayMain(project)
-                    displayMainFromTarget("project", card)
-
-                } else if (currentTabType == "project") {
-                    // const todo = currentProjectTodosData.find(item => item.id == card.dataset.id)
-                    // displayMain(todo)
-                    displayMainFromTarget("todo", card)
-                }
-            }
-        })
-        refs.main.addBtn.addEventListener("click", (e) => {
-            if (currentTabType == "project") showAddWritingEntityDialog("add todo")
-            else showAddWritingEntityDialog("add project")
-        })
-
-        refs.main.optionsBtn.addEventListener("click", (e) => {
-            refs.optionsDialog.showModal()
-        })
-        refs.addWritingEntityDialog.form.addEventListener("submit", (e) => {
-            e.preventDefault
-            const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked")).value
-            console.log(priorityValue)
-            if (currentDialogType == "add project"){
-                projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
-                displayProjectsNav()
-                if (currentTabType == "allProjects") {
-                    displayMain("allProjects")
-                }
-                console.log(projectsData)
-                
-
-            } else if (currentDialogType == "add todo") {
-                currentProject.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
-                displayMain(currentProject)//????????????????/
-
-            } else if (currentDialogType == "edit project" || currentDialogType == "edit todo"){
-                let writingEntity
-                if (currentDialogType == "edit project") writingEntity = currentProject
-                else writingEntity = currentTodo
-                writingEntity.title = refs.addWritingEntityDialog.titleInput.value
-                writingEntity.description = refs.addWritingEntityDialog.descriptionInput.value
-                writingEntity.priority = priorityValue
-                writingEntity.dueDate = refs.addWritingEntityDialog.dueDateInput.value
-                writingEntity.notes = refs.addWritingEntityDialog.notesInput.value
-                displayMain(writingEntity)//????????????????????
-            }
-            refs.addWritingEntityDialog.close()
-            refs.addWritingEntityDialog.form.reset()
-        })
-
-        refs.addWritingEntityDialog.cancelBtn.addEventListener("click", (e) => {
-            refs.addWritingEntityDialog.close()     
-        })
-
-        refs.optionsDialog.addEventListener("click", (e) => {
-            const writingEntity = currentTodo ? currentTodo : currentProject
-            // if (currentTodo){
-            //     const writingEntity = currentTodo
-            // } else {
-            //     const writingEntity = currentProject
-            // }
-            if (e.target.textContent == "Complete"){
-                if (e.target.classList.contains("marked")){
-                    writingEntity.complete = null
-                    e.target.classList.remove("marked")
-                } else {
-                    writingEntity.complete = true
-                    e.target.classList.add("marked")
-                }
-
-
-
-            } else if (e.target.textContent == "Pin") {
-                if (e.target.classList.contains("marked")){
-                    writingEntity.pin = null
-                    e.target.classList.remove("marked")
-                } else {
-                    writingEntity.pin = "regular"
-                    e.target.classList.add("marked")
-                    refs.optionsDialog.pinByPriorityBtn.classList.remove("marked")                      
-                }
-
-
-
-            } else if (e.target.textContent == "Pin by priority") {
-                if (e.target.classList.contains("marked")){
-                    writingEntity.pin = null
-                    e.target.classList.remove("marked")
-                } else {
-                    writingEntity.pin = "by priority"
-                    e.target.classList.add("marked") 
-                    refs.optionsDialog.pinBtn.classList.remove("marked")                   
-                }
-
-            } else if (e.target.textContent == "Edit") {
-                    // editing = true
-                    // if (currentTodo){
-                    //     refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
-                        
-                    // } 
-                    // else refs.addWritingEntityDialog.h3.textContent = "Edit Project"
-                    refs.addWritingEntityDialog.titleInput.value = writingEntity.title
-                    refs.addWritingEntityDialog.descriptionInput.value = writingEntity.description
-                    refs.addWritingEntityDialog.notesInput.value = writingEntity.notes
-                    
-                    for (let ref of refs.addWritingEntityDialog.priorityInputs) {
-
-                    }
-                    // Add selected radio button here
-                    refs.addWritingEntityDialog.dueDateInput.value = writingEntity.dueDate.date
-                    if (currentTabType == "project") showAddWritingEntityDialog("edit project")
-                    else if (currentTabType == "todo") showAddWritingEntityDialog("edit todo")
-                    // editing = false
-                }
-            refs.optionsDialog.close()
-        })
-    })()
+     
     function appendAndActivate(element, parentElement, insertBefore, siblingElement){
         element.classList.add("active")
         if (insertBefore == "insertBefore"){
@@ -434,7 +315,6 @@ export const displayControllerWithModule = function(projectModule){
             }
         }
         FormerAmountCounter.counter = currentAmountCounter.counter
-        // }
     }
 
     const tabs = (function(){
@@ -442,7 +322,7 @@ export const displayControllerWithModule = function(projectModule){
         function determineTabType(instance) {
             if (typeof instance == "object" && instance.hasOwnProperty("getAllTodos")){
                 return "project"
-            } else if (typeof instance == "object" && currentProjectTodosData.includes(instance)) {
+            } else if (typeof instance == "object" && caches.currentProjectTodosData.includes(instance)) {
                 return "todo"
             } else if (typeof instance == "string" && instance == "allProjects"){
                 return instance
@@ -452,19 +332,19 @@ export const displayControllerWithModule = function(projectModule){
         function setTabVars(instance, tabTypeDetermined){
             switch (tabTypeDetermined){
                 case "todo":
-                    currentTabType = "todo"
-                    currentTodo = instance
+                    caches.currentTabType = "todo"
+                    caches.currentTodo = instance
                     break;
                 case "project":
-                    currentTabType = "project"
-                    currentTodo = null
-                    currentProject = instance
-                    currentProjectTodosData = instance.getAllTodos()
+                    caches.currentTabType = "project"
+                    caches.currentTodo = null
+                    caches.currentProject = instance
+                    caches.currentProjectTodosData = instance.getAllTodos()
                     break;
                 case "allProjects":
-                    currentTabType = "allProjects"
-                    currentProject = null
-                    currentTodo = null
+                    caches.currentTabType = "allProjects"
+                    caches.currentProject = null
+                    caches.currentTodo = null
             }
         }
 
@@ -475,10 +355,11 @@ export const displayControllerWithModule = function(projectModule){
                 appendAndActivate(refs.main.optionsBtn, refs.main, "insertBefore", refs.main.h1)
             }
             if (tabTypeDetermined == "project") {
-                if (lastProjectLiDOMRef) lastProjectLiDOMRef.classList.remove("current-project")
-                const currentProjectLi = refs.header.lis.find(element => element.dataset.id === currentProject.id)
-                currentProjectLi.classList.add("current-project")
-                lastProjectLiDOMRef = currentProjectLi
+                if (caches.lastProjectLiDOMRef) caches.lastProjectLiDOMRef.classList.remove("current-project")
+                const currentProjectLi = refs.header.lis.find(element => element.dataset.id === caches.currentProject.id)
+                currentProjectLi.classList.add("current-project") // current projects li's background is lighter.
+                caches.lastProjectLiDOMRef = currentProjectLi
+                
                 appendAndActivate(refs.main.addBtn, refs.main, "insertBefore", refs.main.ul.nextSibling)
                 refs.main.addBtn.textContent = "Add Todo"
             } else if (tabTypeDetermined == "allProjects") {
@@ -487,8 +368,8 @@ export const displayControllerWithModule = function(projectModule){
                 removeAndDeactivate(refs.main.ul)
                 removeAndDeactivate(refs.main.optionsBtn)
                 refs.main.addBtn.textContent = "Add Project"
-                if (lastProjectLiDOMRef){
-                    lastProjectLiDOMRef.classList.remove("current-project")
+                if (caches.lastProjectLiDOMRef){
+                    caches.lastProjectLiDOMRef.classList.remove("current-project")
                 }
             } else if (tabTypeDetermined == "todo") {
                 removeAndDeactivate(refs.main.addBtn)
@@ -496,6 +377,195 @@ export const displayControllerWithModule = function(projectModule){
         }
         return {determineTabType, setTabVars, adjustDisplayToTabType}
     })()
+
+    const eventsController = (function(){
+        
+        function displayMainFromTarget(tabType, target){
+            if (tabType == "project"){
+                const project = caches.projectsData.find(item => item.id == target.dataset.id)
+                displayMain(project)
+            } else if (tabType == "todo"){
+                const todo = caches.currentProjectTodosData.find(item => item.id == target.dataset.id)
+                displayMain(todo)
+            }
+        }
+
+        function showAddWritingEntityDialog(type) {
+            let types = ["edit project", "add project", "edit todo", "add todo"]
+            if (types.includes(type)){
+                if (type == types[0]) refs.addWritingEntityDialog.h3.textContent = "Edit Project"
+                else if (type == types[1]) refs.addWritingEntityDialog.h3.textContent = "Add Project"
+                else if (type == types[2]) refs.addWritingEntityDialog.h3.textContent = "Edit Todo"
+                else if (type == types[3]) refs.addWritingEntityDialog.h3.textContent = "Add Todo"
+            }
+            caches.currentDialogType = type
+            refs.addWritingEntityDialog.showModal()
+
+        }
+
+        // Event Listeners
+
+        refs.header.addEventListener("click",(e)=>{
+            if (e.target.classList.contains("my-projects-btn")){
+                displayMain("allProjects")               
+            } else if (e.target.hasAttribute("data-id")){
+                displayMainFromTarget("project", e.target)
+            } else if (e.target.classList.contains("add-project-btn")){
+                showAddWritingEntityDialog("add project")
+            }
+        })
+
+        refs.main.addEventListener("click",(e)=>{
+            const card = e.target.closest(".card")
+            if (!card) return
+            if (card.hasAttribute("data-id")){
+                if (caches.currentTabType == "allProjects"){
+                    displayMainFromTarget("project", card)
+                } else if (caches.currentTabType == "project") {
+                    displayMainFromTarget("todo", card)
+                }
+            }
+        })
+
+        refs.main.addBtn.addEventListener("click", (e) => {
+            if (caches.currentTabType == "project") showAddWritingEntityDialog("add todo")
+            else showAddWritingEntityDialog("add project")
+        })
+
+        refs.main.optionsBtn.addEventListener("click", (e) => {
+            refs.optionsDialog.showModal()
+        })
+
+        refs.addWritingEntityDialog.form.addEventListener("submit", (e) => {
+            e.preventDefault
+            const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked")).value
+            console.log(priorityValue)
+            if (caches.currentDialogType == "add project"){
+                projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                displayProjectsNav()
+                if (caches.currentTabType == "allProjects") {
+                    displayMain("allProjects")
+                }
+                console.log(caches.projectsData)
+                
+
+            } else if (caches.currentDialogType == "add todo") {
+                caches.currentProject.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
+                displayMain(caches.currentProject)//????????????????/
+
+            } else if (caches.currentDialogType == "edit project" || caches.currentDialogType == "edit todo"){
+                let writingEntity
+                if (caches.currentDialogType == "edit project") writingEntity = caches.currentProject
+                else writingEntity = caches.currentTodo
+                writingEntity.title = refs.addWritingEntityDialog.titleInput.value
+                writingEntity.description = refs.addWritingEntityDialog.descriptionInput.value
+                writingEntity.priority = priorityValue
+                writingEntity.dueDate = refs.addWritingEntityDialog.dueDateInput.value
+                writingEntity.notes = refs.addWritingEntityDialog.notesInput.value
+                displayMain(writingEntity)//????????????????????
+            }
+            refs.addWritingEntityDialog.close()
+            refs.addWritingEntityDialog.form.reset()
+        })
+
+        refs.addWritingEntityDialog.cancelBtn.addEventListener("click", (e) => {
+            refs.addWritingEntityDialog.close()     
+        })
+
+        refs.optionsDialog.addEventListener("click", (e) => {
+            const writingEntity = caches.currentTodo ? caches.currentTodo : caches.currentProject
+            // if (e.target.textContent == "Complete"){
+            if (e.target === refs.optionsDialog.complete){
+                if (e.target.classList.contains("marked")){
+                    writingEntity.complete = null
+                    e.target.classList.remove("marked")
+                } else {
+                    writingEntity.complete = true
+                    e.target.classList.add("marked")
+                }
+
+
+
+            } else if (e.target === refs.optionsDialog.pin) {
+                if (e.target.classList.contains("marked")){
+                    writingEntity.pin = null
+                    e.target.classList.remove("marked")
+                } else {
+                    writingEntity.pin = "regular"
+                    e.target.classList.add("marked")
+                    refs.optionsDialog.pinByPriority.classList.remove("marked")                      
+                }
+
+
+
+            } else if (e.target === refs.optionsDialog.pinByPriority) {
+                if (e.target.classList.contains("marked")){
+                    writingEntity.pin = null
+                    e.target.classList.remove("marked")
+                } else {
+                    writingEntity.pin = "by priority"
+                    e.target.classList.add("marked") 
+                    refs.optionsDialog.pin.classList.remove("marked")                   
+                }
+
+            } else if (e.target === refs.optionsDialog.edit) {
+                refs.addWritingEntityDialog.titleInput.value = writingEntity.title
+                refs.addWritingEntityDialog.descriptionInput.value = writingEntity.description
+                refs.addWritingEntityDialog.notesInput.value = writingEntity.notes
+                refs.addWritingEntityDialog.priorityInputs[writingEntity.priority].checked = true
+                refs.addWritingEntityDialog.dueDateInput.value = writingEntity.dueDate.date
+                if (caches.currentTabType == "project") showAddWritingEntityDialog("edit project")
+                else if (caches.currentTabType == "todo") showAddWritingEntityDialog("edit todo")
+                refs.optionsDialog.close()
+            
+            } else if (e.target === refs.optionsDialog.info){
+                refs.infoDialog.creationDate.textContent = `Creation Date: ${writingEntity.creationDate}`
+                refs.infoDialog.notes.textContent = `Notes: ${writingEntity.notes}`
+                refs.infoDialog.showModal()
+                refs.optionsDialog.close()
+            } else if (e.target === refs.optionsDialog.removeBtn){
+                refs.removalDialog.showModal()
+                refs.optionsDialog.close()
+                // if (caches.currentTabType == "project"){
+                //     caches.projectsData.splice(0, 1, writingEntity)
+                // }
+            }
+            
+        })
+    })()
+
+    refs.infoDialog.cancelBtn.addEventListener("click", (e) => {
+        refs.infoDialog.close()
+    })
+
+    refs.removalDialog.addEventListener("click", (e) => {
+        if (e.target === refs.removalDialog.cancelBtn){
+            refs.removalDialog.close()
+        } else if (e.target === refs.removalDialog.deleteBtn) {
+            if (caches.currentTabType == "project"){
+                const index = caches.projectsData.findIndex(item => item.id == caches.currentProject.id)
+                caches.projectsData.splice(index, 1)
+                displayProjectsNav()
+                displayMain("allProjects")
+                console.log(caches.projectsData)
+            } else if (caches.currentTabType == "todo"){
+                const index = caches.currentProjectTodosData.findIndex(item => item.id == caches.currentTodo.id)
+                caches.currentProjectTodosData.splice(index, 1)
+                displayMain(caches.currentProject)
+            }
+            refs.removalDialog.close()
+        }
+    })
+
+    refs.aside.addEventListener("click", (e) => {
+        let index
+        if (e.target.matches("li")) {
+            index = refs.aside.lis.indexOf(e.target)
+        }
+        if (e.target.matches("button.complete-btn")){
+            //get the right check from check list and run completeCheckFromCheckList to make it complete
+        }
+    })
     return {displayProjectsNav, displayMain,}
 }
 

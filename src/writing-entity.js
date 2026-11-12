@@ -132,7 +132,7 @@ export const writingEntity = (function() {
                 }
             },
 
-            addTocheckList: {
+            addToCheckList: {
                 value: function(data) {
                     const fullData = {content: data, complete: false}
                     this._checkList.push(fullData)
@@ -143,6 +143,12 @@ export const writingEntity = (function() {
                 // get(){
                 //     return this._checkList
                 // }
+            },
+            
+            completeCheckFromCheckList: {
+                value: function(item){
+                    item.complete = true
+                }
             },
             
             checkList: {

@@ -97,7 +97,7 @@ main>button.options-btn{
     background-repeat: no-repeat;
     background-size: cover;
     background-position: 10% 0;
-    display: inline;
+    /* display: inline; */
     position: absolute;
     right: 35%;
     top: 11px;
@@ -174,11 +174,26 @@ aside ul{
 }
 
 aside li{
-    list-style:circle;
+    /* list-style: circle; */
+    display: flex;
+    justify-content: space-between;
 }
 
-aside li::marker{
-    margin: 1.5rem;
+/* aside li::marker{
+    padding: 1rem;
+} */
+
+aside li button.complete-btn {
+    width: 15px;
+    height: 15px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background-color: inherit;
+    background-image: url(check.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 10% 0;
 }
 
 :modal {
@@ -225,6 +240,44 @@ form.add-writing-entity-form>div.btns-wrapper>button{
 dialog.options-dialog>button.marked{
     background-color: aquamarine;
 }
+
+dialog.info-dialog>div,
+dialog.removal-dialog>div{
+    padding: 24px;
+    display: grid; 
+    row-gap: 16px;
+}
+
+dialog.info-dialog>div{
+    width: min(580px, 90vw);
+    position: relative;
+}
+
+dialog.info-dialog button.cancel-button{
+    width: 15px;
+    height: 15px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background-color: inherit;
+    background-image: url(close.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 10% 0;
+    position: absolute;
+    right: 11px;
+    top: 11px
+}
+
+dialog.info-dialog h3 {
+    text-align: center;
+}
+
+
+    /* position: absolute;
+    right: 11px;
+    top: 11px */
+
 /* [hidden] {
     display: none !important;
 } */
