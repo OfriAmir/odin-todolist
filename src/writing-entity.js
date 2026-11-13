@@ -134,7 +134,7 @@ export const writingEntity = (function() {
 
             addToCheckList: {
                 value: function(data) {
-                    const fullData = {content: data, complete: false}
+                    const fullData = {content: data, completed: false}
                     this._checkList.push(fullData)
                 },
                 // set(data){
@@ -147,7 +147,7 @@ export const writingEntity = (function() {
             
             completeCheckFromCheckList: {
                 value: function(item){
-                    item.complete = true
+                    item.completed = true
                 }
             },
             

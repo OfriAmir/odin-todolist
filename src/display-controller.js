@@ -11,6 +11,7 @@ export const displayControllerWithModule = function(projectModule){
     const caches = (function(){
         const projectsData = projectModule.getAllProjects()
         const defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
+        let currentWritingEntity
         let currentProjectTodosData
         let currentProject
         let currentTodo
@@ -28,7 +29,10 @@ export const displayControllerWithModule = function(projectModule){
                 }
             },
             aside: {
-                lis: {
+                lis1: {
+                    counter: 0
+                },
+                lis2: {
                     counter: 0
                 } 
             },
@@ -46,13 +50,17 @@ export const displayControllerWithModule = function(projectModule){
                 } 
             },
             aside: {
-                lis: {
+                lis1: {
                     counter: 0
-                } 
+                },
+                lis2: {
+                    counter: 0
+                }
             },
         }
         let lastProjectLiDOMRef
-        return {projectsData, defaultPriorityOptions, currentProjectTodosData, currentProject, currentTodo, currentTabType, currentDialogType, currentActive, formerActive, lastProjectLiDOMRef}
+        let checkListShowCompleted
+        return {projectsData, defaultPriorityOptions, currentWritingEntity, currentProjectTodosData, currentProject, currentTodo, currentTabType, currentDialogType, currentActive, formerActive, lastProjectLiDOMRef, checkListShowCompleted}
     })()
     // const caches.projectsData = projectModule.getAllProjects()
     // const caches.defaultPriorityOptions = ["Unspecified", "Very Low", "Low", "Medium", "High", "Very High"]
@@ -69,7 +77,8 @@ export const displayControllerWithModule = function(projectModule){
         addWritingEntityDialog: document.querySelector("dialog.add-writing-entity-dialog"),
         optionsDialog: document.querySelector("dialog.options-dialog"),
         infoDialog: document.querySelector("dialog.info-dialog"),
-        removalDialog: document.querySelector("dialog.removal-dialog")
+        removalDialog: document.querySelector("dialog.removal-dialog"),
+        checkListDialog: document.querySelector("dialog.checklist-dialog"),
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
@@ -86,9 +95,15 @@ export const displayControllerWithModule = function(projectModule){
 
     refs.aside.classList.add("active")
     refs.aside.h2 = document.querySelector("aside>h2")
-    refs.aside.ul = document.querySelector("aside>ul")
-    refs.aside.lis = []
-    refs.aside.textSpans = []
+    refs.aside.ul1 = document.querySelector("aside>ul")
+    refs.aside.lis1 = []
+    refs.aside.textSpans1 = []
+    refs.aside.h3Completed = document.createElement("h3")
+    refs.aside.h3Completed.textContent = "Completed:"
+    refs.aside.ul2 = document.createElement("ul")
+    refs.aside.lis2 = []
+    refs.aside.textSpans2 = []
+
 
     refs.addWritingEntityDialog.form = refs.addWritingEntityDialog.querySelector("form")
     refs.addWritingEntityDialog.h3 = refs.addWritingEntityDialog.querySelector("h3")
@@ -117,9 +132,15 @@ export const displayControllerWithModule = function(projectModule){
     refs.infoDialog.creationDate = refs.infoDialog.lis[0]
     refs.infoDialog.notes = refs.infoDialog.lis[1]
 
+    refs.removalDialog.h3 = refs.removalDialog.querySelector("h3")
     refs.removalDialog.btns = [...refs.removalDialog.querySelectorAll("button")]
     refs.removalDialog.cancelBtn = refs.removalDialog.btns[0]
     refs.removalDialog.deleteBtn = refs.removalDialog.btns[1]
+
+    // refs.checkListDialog.cancelBtn = refs.checkListDialog.querySelector("button.cancel-button")
+    refs.checkListDialog.btns = [...refs.checkListDialog.querySelectorAll("button")]
+    refs.checkListDialog.addToCheckList = refs.checkListDialog.btns[0]
+    refs.checkListDialog.showCompleted = refs.checkListDialog.btns[1]
 
     // let currentActive = {
     //     header: {
@@ -251,47 +272,99 @@ export const displayControllerWithModule = function(projectModule){
     }
 
     function displayCheckList(tabTypeDetermined){
-        let dataArr = []
+        function checksLoop(checksArr, ul, lis, textSpans){
+            checksArr.forEach((item, index) => {
+                let li
+                let completeBtn
+                let textSpan
+                if (index < lis.length) {
+                    li = lis[index]
+                    textSpan = textSpans[index]
+                } else {
+                    li = document.createElement("li")
+                    lis.push(li)
+                    textSpan = document.createElement("span")
+                    textSpan.classList.add("text-span")
+                    textSpans.push(textSpan)
+                    completeBtn = document.createElement("button")
+                    completeBtn.classList.add("complete-btn")
+                    li.appendChild(textSpan)
+                    li.appendChild(completeBtn)
+                }
+                
+                if (!li.classList.contains("active")){
+                    ul.appendChild(li)
+                    li.classList.add("active")
+                    
+                    // if (completeBtn) li.appendChild(completeBtn)
+                    textSpan.textContent = item.content
+                }
+            })            
+        }
+
+
+        let checks = []
         if (tabTypeDetermined == "project"){
-            dataArr = caches.currentProject.checkList
+            checks = caches.currentProject.checkList
         } else if (tabTypeDetermined == "allProjects") {
              //No checkList in this tab, skip loop.
         } else if (tabTypeDetermined == "todo") {
-            dataArr = caches.currentTodo.checkList
+            checks = caches.currentTodo.checkList
         } else return
+        if (checks.length > 0){
+            let completedChecks, incompletedChecks
+            incompletedChecks = checks.filter(check => check.completed === false)
 
-
-        dataArr.forEach((item, index) => {
-            let li
-            let completeBtn
-            let textSpan
-            if (index < refs.aside.lis.length) {
-                li = refs.aside.lis[index]
-                textSpan = refs.aside.textSpans[index]
+            if (caches.checkListShowCompleted){
+                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1)
+                removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
+                appendAndActivate(refs.aside.h3Completed, refs.aside)
+                appendAndActivate(refs.aside.ul2, refs.aside)
+                completedChecks = checks.filter(check => check.completed === true)
+                if (completedChecks.length > 0){        
+                    checksLoop(completedChecks, refs.aside.ul2, refs.aside.lis2, refs.aside.textSpans2)
+                    removeAndDeactivateSuperfluous(refs.aside.lis2, caches.formerActive.aside.lis2, caches.currentActive.aside.lis2, completedChecks.length)
+                }
             } else {
-                li = document.createElement("li")
-                refs.aside.lis.push(li)
-                textSpan = document.createElement("span")
-                textSpan.classList.add("text-span")
-                refs.aside.textSpans.push(textSpan)
-                completeBtn = document.createElement("button")
-                completeBtn.classList.add("complete-btn")
-                li.appendChild(textSpan)
-                li.appendChild(completeBtn)
+                removeAndDeactivate(refs.aside.h3Completed)
+                removeAndDeactivate(refs.aside.ul2)
+                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1)
+                removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
             }
+        }
+
+
+        // checks.forEach((item, index) => {
+        //     let li
+        //     let completeBtn
+        //     let textSpan
+        //     if (index < refs.aside.lis.length) {
+        //         li = refs.aside.lis[index]
+        //         textSpan = refs.aside.textSpans[index]
+        //     } else {
+        //         li = document.createElement("li")
+        //         refs.aside.lis.push(li)
+        //         textSpan = document.createElement("span")
+        //         textSpan.classList.add("text-span")
+        //         refs.aside.textSpans.push(textSpan)
+        //         completeBtn = document.createElement("button")
+        //         completeBtn.classList.add("complete-btn")
+        //         li.appendChild(textSpan)
+        //         li.appendChild(completeBtn)
+        //     }
             
-            if (!li.classList.contains("active")){
-                refs.aside.ul.appendChild(li)
-                li.classList.add("active")
+        //     if (!li.classList.contains("active")){
+        //         refs.aside.ul.appendChild(li)
+        //         li.classList.add("active")
                 
-                // if (completeBtn) li.appendChild(completeBtn)
-                textSpan.textContent = item.content
-            }
-        })
-        removeAndDeactivateSuperfluous(refs.aside.lis, caches.formerActive.aside.lis, caches.currentActive.aside.lis, dataArr.length)
+        //         // if (completeBtn) li.appendChild(completeBtn)
+        //         textSpan.textContent = item.content
+        //     }
+        // })
+        // removeAndDeactivateSuperfluous(refs.aside.lis, caches.formerActive.aside.lis, caches.currentActive.aside.lis, checks.length)
     }
 
-    // CheckList should be an array of {content, complete} objects.
+    // CheckList should be an array of {content, completed} objects.
      
     function appendAndActivate(element, parentElement, insertBefore, siblingElement){
         element.classList.add("active")
@@ -334,17 +407,21 @@ export const displayControllerWithModule = function(projectModule){
                 case "todo":
                     caches.currentTabType = "todo"
                     caches.currentTodo = instance
+                    caches.currentWritingEntity = instance
                     break;
                 case "project":
                     caches.currentTabType = "project"
                     caches.currentTodo = null
                     caches.currentProject = instance
                     caches.currentProjectTodosData = instance.getAllTodos()
+                    caches.currentWritingEntity = instance
                     break;
                 case "allProjects":
                     caches.currentTabType = "allProjects"
                     caches.currentProject = null
                     caches.currentTodo = null
+                    caches.currentWritingEntity = null
+
             }
         }
 
@@ -524,6 +601,7 @@ export const displayControllerWithModule = function(projectModule){
                 refs.infoDialog.showModal()
                 refs.optionsDialog.close()
             } else if (e.target === refs.optionsDialog.removeBtn){
+                refs.removalDialog.h3.textContent = `Are you sure you want to remove ${writingEntity.title}?`
                 refs.removalDialog.showModal()
                 refs.optionsDialog.close()
                 // if (caches.currentTabType == "project"){
@@ -558,12 +636,35 @@ export const displayControllerWithModule = function(projectModule){
     })
 
     refs.aside.addEventListener("click", (e) => {
+        if (e.target.matches(".options-btn")){
+            refs.checkListDialog.showModal()
+        }
         let index
         if (e.target.matches("li")) {
             index = refs.aside.lis.indexOf(e.target)
         }
         if (e.target.matches("button.complete-btn")){
             //get the right check from check list and run completeCheckFromCheckList to make it complete
+        }
+    })
+
+    refs.checkListDialog.addEventListener("click", (e) => {
+        if (e.target.matches("button.cancel-button")){
+            refs.checkListDialog.close()
+        }
+        if (e.target === refs.checkListDialog.addToCheckList){
+
+        } else if (e.target.matches(".show-completed") ){
+            if (e.target.classList.contains("marked")){
+                caches.checkListShowCompleted = false
+                displayCheckList(caches.currentTabType)
+                e.target.classList.remove("marked")
+
+            } else {
+                caches.checkListShowCompleted = true
+                displayCheckList(caches.currentTabType)
+                e.target.classList.add("marked")
+            }
         }
     })
     return {displayProjectsNav, displayMain,}

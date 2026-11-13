@@ -8,6 +8,8 @@ import {displayControllerWithModule} from "./display-controller.js"
     let myProject3 = project.createProject("My Title", "My Description")
     myProject1.createTodo("Hi", "How are you?")
     myProject1.addToCheckList("Do Your Todos")
+    myProject2.addToCheckList("Do Your Todosfaggagagag")
+    myProject2.addToCheckList("Do Your Todosfaggagagag")
     const displayController = displayControllerWithModule(project)
     displayController.displayProjectsNav()
     displayController.displayMain("allProjects")

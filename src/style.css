@@ -169,6 +169,25 @@ aside{
     padding: 0 16px 0 24px;
 }
 
+aside>div:first-child{
+    display: flex;
+    justify-content: space-between;
+}
+
+aside button.options-btn{
+    width: 15px;
+    height: 15px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    background-color: inherit;
+    background-image: url(menu-dots-vertical.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    align-self: center;
+    /* background-position: 10% 0; */
+}
+
 aside ul{
     margin-top: 16px;
 }
@@ -237,12 +256,14 @@ form.add-writing-entity-form>div.btns-wrapper>button{
 
 }
 
-dialog.options-dialog>button.marked{
+dialog.options-dialog>button.marked,
+.marked{
     background-color: aquamarine;
 }
 
 dialog.info-dialog>div,
-dialog.removal-dialog>div{
+dialog.removal-dialog>div,
+dialog.checklist-dialog>div{
     padding: 24px;
     display: grid; 
     row-gap: 16px;
@@ -253,7 +274,12 @@ dialog.info-dialog>div{
     position: relative;
 }
 
-dialog.info-dialog button.cancel-button{
+dialog.checklist-dialog>div{
+    position: relative;
+}
+
+dialog.info-dialog button.cancel-button,
+dialog.checklist-dialog button.cancel-button{ 
     width: 15px;
     height: 15px;
     outline: none;
