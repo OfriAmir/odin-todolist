@@ -134,7 +134,7 @@ export const writingEntity = (function() {
 
             addToCheckList: {
                 value: function(data) {
-                    const fullData = {content: data, completed: false}
+                    const fullData = {content: data, completed: false, id: crypto.randomUUID()}
                     this._checkList.push(fullData)
                 },
                 // set(data){

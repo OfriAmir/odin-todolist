@@ -167,9 +167,13 @@ aside{
     top: 300px;
     right: 24px;
     padding: 0 16px 0 24px;
+
 }
 
-aside>div:first-child{
+aside>*:not(div){
+    margin-top: 16px;
+}
+aside>div{
     display: flex;
     justify-content: space-between;
 }
@@ -202,7 +206,8 @@ aside li{
     padding: 1rem;
 } */
 
-aside li button.complete-btn {
+aside li button.complete-btn,
+aside li button.undo-btn {
     width: 15px;
     height: 15px;
     outline: none;
@@ -213,6 +218,10 @@ aside li button.complete-btn {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: 10% 0;
+}
+
+aside li button.undo-btn{
+    background-image: url(undo.svg);
 }
 
 :modal {

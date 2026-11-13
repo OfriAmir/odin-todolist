@@ -272,10 +272,10 @@ export const displayControllerWithModule = function(projectModule){
     }
 
     function displayCheckList(tabTypeDetermined){
-        function checksLoop(checksArr, ul, lis, textSpans){
+        function checksLoop(checksArr, ul, lis, textSpans, btnClass){
             checksArr.forEach((item, index) => {
                 let li
-                let completeBtn
+                let Btn
                 let textSpan
                 if (index < lis.length) {
                     li = lis[index]
@@ -286,10 +286,10 @@ export const displayControllerWithModule = function(projectModule){
                     textSpan = document.createElement("span")
                     textSpan.classList.add("text-span")
                     textSpans.push(textSpan)
-                    completeBtn = document.createElement("button")
-                    completeBtn.classList.add("complete-btn")
+                    Btn = document.createElement("button")
+                    Btn.classList.add(`${btnClass}`)
                     li.appendChild(textSpan)
-                    li.appendChild(completeBtn)
+                    li.appendChild(Btn)
                 }
                 
                 if (!li.classList.contains("active")){
@@ -299,6 +299,8 @@ export const displayControllerWithModule = function(projectModule){
                     // if (completeBtn) li.appendChild(completeBtn)
                     textSpan.textContent = item.content
                 }
+
+                li.dataset.id = item.id
             })            
         }
 
@@ -311,27 +313,30 @@ export const displayControllerWithModule = function(projectModule){
         } else if (tabTypeDetermined == "todo") {
             checks = caches.currentTodo.checkList
         } else return
+        let completedChecks = []
+        let incompletedChecks = []
         if (checks.length > 0){
-            let completedChecks, incompletedChecks
             incompletedChecks = checks.filter(check => check.completed === false)
 
             if (caches.checkListShowCompleted){
-                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1)
-                removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
+                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1, "complete-btn")
+                
                 appendAndActivate(refs.aside.h3Completed, refs.aside)
                 appendAndActivate(refs.aside.ul2, refs.aside)
                 completedChecks = checks.filter(check => check.completed === true)
                 if (completedChecks.length > 0){        
-                    checksLoop(completedChecks, refs.aside.ul2, refs.aside.lis2, refs.aside.textSpans2)
-                    removeAndDeactivateSuperfluous(refs.aside.lis2, caches.formerActive.aside.lis2, caches.currentActive.aside.lis2, completedChecks.length)
+                    checksLoop(completedChecks, refs.aside.ul2, refs.aside.lis2, refs.aside.textSpans2, "undo-btn")
+                    console.log("hello")
                 }
             } else {
                 removeAndDeactivate(refs.aside.h3Completed)
                 removeAndDeactivate(refs.aside.ul2)
-                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1)
+                checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1, "complete-btn")
                 removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
             }
         }
+        removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
+        removeAndDeactivateSuperfluous(refs.aside.lis2, caches.formerActive.aside.lis2, caches.currentActive.aside.lis2, completedChecks.length)
 
 
         // checks.forEach((item, index) => {
@@ -644,6 +649,17 @@ export const displayControllerWithModule = function(projectModule){
             index = refs.aside.lis.indexOf(e.target)
         }
         if (e.target.matches("button.complete-btn")){
+            const checkId = e.target.closest("li").dataset.id
+
+            caches.currentWritingEntity.checkList.find(check => check.id === checkId).completed = true
+            displayCheckList(caches.currentTabType)
+            //get the right check from check list and run completeCheckFromCheckList to make it complete
+        }
+        if (e.target.matches("button.undo-btn")){
+            const checkId = e.target.closest("li").dataset.id
+
+            caches.currentWritingEntity.checkList.find(check => check.id === checkId).completed = false
+            displayCheckList(caches.currentTabType)
             //get the right check from check list and run completeCheckFromCheckList to make it complete
         }
     })
