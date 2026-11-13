@@ -79,6 +79,7 @@ export const displayControllerWithModule = function(projectModule){
         infoDialog: document.querySelector("dialog.info-dialog"),
         removalDialog: document.querySelector("dialog.removal-dialog"),
         checkListDialog: document.querySelector("dialog.checklist-dialog"),
+        addToCheckListDialog: document.querySelector("dialog.add-to-checklist")
     }
     refs.header.ol = document.querySelector("header nav>ol")
     refs.header.lis = []
@@ -142,6 +143,8 @@ export const displayControllerWithModule = function(projectModule){
     refs.checkListDialog.addToCheckList = refs.checkListDialog.btns[0]
     refs.checkListDialog.showCompleted = refs.checkListDialog.btns[1]
 
+    refs.addToCheckListDialog.form = refs.addToCheckListDialog.querySelector("form")
+    refs.addToCheckListDialog.input = refs.addToCheckListDialog.querySelector("textarea")
     // let currentActive = {
     //     header: {
     //         lis: {
@@ -519,9 +522,8 @@ export const displayControllerWithModule = function(projectModule){
         })
 
         refs.addWritingEntityDialog.form.addEventListener("submit", (e) => {
-            e.preventDefault
+            e.preventDefault()
             const priorityValue = refs.addWritingEntityDialog.priorityInputs.find(element => element.matches(":checked")).value
-            console.log(priorityValue)
             if (caches.currentDialogType == "add project"){
                 projectModule.createProject(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
                 displayProjectsNav()
@@ -644,23 +646,16 @@ export const displayControllerWithModule = function(projectModule){
         if (e.target.matches(".options-btn")){
             refs.checkListDialog.showModal()
         }
-        let index
-        if (e.target.matches("li")) {
-            index = refs.aside.lis.indexOf(e.target)
-        }
         if (e.target.matches("button.complete-btn")){
             const checkId = e.target.closest("li").dataset.id
-
             caches.currentWritingEntity.checkList.find(check => check.id === checkId).completed = true
             displayCheckList(caches.currentTabType)
-            //get the right check from check list and run completeCheckFromCheckList to make it complete
         }
         if (e.target.matches("button.undo-btn")){
             const checkId = e.target.closest("li").dataset.id
-
             caches.currentWritingEntity.checkList.find(check => check.id === checkId).completed = false
             displayCheckList(caches.currentTabType)
-            //get the right check from check list and run completeCheckFromCheckList to make it complete
+
         }
     })
 
@@ -668,8 +663,8 @@ export const displayControllerWithModule = function(projectModule){
         if (e.target.matches("button.cancel-button")){
             refs.checkListDialog.close()
         }
-        if (e.target === refs.checkListDialog.addToCheckList){
-
+        if (e.target.matches("button.add-to-checklist")){
+            refs.addToCheckListDialog.showModal()
         } else if (e.target.matches(".show-completed") ){
             if (e.target.classList.contains("marked")){
                 caches.checkListShowCompleted = false
@@ -682,6 +677,19 @@ export const displayControllerWithModule = function(projectModule){
                 e.target.classList.add("marked")
             }
         }
+    })
+
+    refs.addToCheckListDialog.form.addEventListener("submit", (e) => {
+        console.log("dssf")
+        e.preventDefault()
+        const input = refs.addToCheckListDialog.input.value
+        if (input){
+            caches.currentWritingEntity.addToCheckList(input)
+            displayCheckList(caches.currentTabType)
+        }
+        refs.addToCheckListDialog.close()
+        refs.addToCheckListDialog.form.reset()
+        refs.checkListDialog.close()
     })
     return {displayProjectsNav, displayMain,}
 }
