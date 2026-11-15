@@ -3,6 +3,9 @@ import {project} from "./project.js"
 import {displayControllerWithModule} from "./display-controller.js"
 
 (function () {
+    // if (storageAvailable()){
+        
+    // }
     let myProject1 = project.createProject("My Title", "My Description")
     let myProject2 = project.createProject("My Title", "My Description")
     let myProject3 = project.createProject("My Title", "My Description")
@@ -14,5 +17,7 @@ import {displayControllerWithModule} from "./display-controller.js"
     displayController.displayProjectsNav()
     displayController.displayMain("allProjects")
     // displayController.clearMain()
+
+    
 })()
 
