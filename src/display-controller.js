@@ -329,13 +329,12 @@ export const displayControllerWithModule = function(projectModule){
                 completedChecks = checks.filter(check => check.completed === true)
                 if (completedChecks.length > 0){        
                     checksLoop(completedChecks, refs.aside.ul2, refs.aside.lis2, refs.aside.textSpans2, "undo-btn")
-                    console.log("hello")
                 }
             } else {
                 removeAndDeactivate(refs.aside.h3Completed)
                 removeAndDeactivate(refs.aside.ul2)
                 checksLoop(incompletedChecks, refs.aside.ul1, refs.aside.lis1, refs.aside.textSpans1, "complete-btn")
-                removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
+                // removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
             }
         }
         removeAndDeactivateSuperfluous(refs.aside.lis1, caches.formerActive.aside.lis1, caches.currentActive.aside.lis1, incompletedChecks.length)
@@ -442,7 +441,6 @@ export const displayControllerWithModule = function(projectModule){
             if (tabTypeDetermined == "project") {
                 if (caches.lastProjectLiDOMRef) caches.lastProjectLiDOMRef.classList.remove("current-project")
                 const currentProjectLi = refs.header.lis.find(element => element.dataset.id === caches.currentProject.id)
-                console.log(refs.header.lis)
                 currentProjectLi.classList.add("current-project") // current projects li's background is lighter.
                 caches.lastProjectLiDOMRef = currentProjectLi
                 
@@ -536,7 +534,7 @@ export const displayControllerWithModule = function(projectModule){
 
             } else if (caches.currentDialogType == "add todo") {
                 caches.currentProject.createTodo(refs.addWritingEntityDialog.titleInput.value, refs.addWritingEntityDialog.descriptionInput.value, priorityValue, refs.addWritingEntityDialog.dueDateInput.value ,refs.addWritingEntityDialog.notesInput.value)
-                displayMain(caches.currentProject)//????????????????/
+                displayMain(caches.currentProject)
 
             } else if (caches.currentDialogType == "edit project" || caches.currentDialogType == "edit todo"){
                 let writingEntity
@@ -547,7 +545,7 @@ export const displayControllerWithModule = function(projectModule){
                 writingEntity.priority = priorityValue
                 writingEntity.dueDate = refs.addWritingEntityDialog.dueDateInput.value
                 writingEntity.notes = refs.addWritingEntityDialog.notesInput.value
-                displayMain(writingEntity)//????????????????????
+                displayMain(writingEntity)
             }
             refs.addWritingEntityDialog.close()
             refs.addWritingEntityDialog.form.reset()
@@ -634,7 +632,6 @@ export const displayControllerWithModule = function(projectModule){
                 caches.currentProject.remove()
                 displayProjectsNav()
                 displayMain("allProjects")
-                console.log(caches.projectsData)
             } else if (caches.currentTabType == "todo"){
                 const index = caches.currentProjectTodosData.findIndex(item => item.id == caches.currentTodo.id)
                 // caches.currentProjectTodosData.splice(index, 1)

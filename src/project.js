@@ -86,7 +86,7 @@ export const project = (function(){
     function createProjectsFromStorage(){
         if (!storageAvailable || localStorage.length === 0) return
         const arrFromStorage = JSON.parse(localStorage.allProjects)
-        arrFromStorage.forEach((project, index) => {
+        arrFromStorage.forEach((project) => {
             let _todos = project._todos
             function getAllTodos() {
                 return project._todos
