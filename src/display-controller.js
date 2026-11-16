@@ -442,6 +442,7 @@ export const displayControllerWithModule = function(projectModule){
             if (tabTypeDetermined == "project") {
                 if (caches.lastProjectLiDOMRef) caches.lastProjectLiDOMRef.classList.remove("current-project")
                 const currentProjectLi = refs.header.lis.find(element => element.dataset.id === caches.currentProject.id)
+                console.log(refs.header.lis)
                 currentProjectLi.classList.add("current-project") // current projects li's background is lighter.
                 caches.lastProjectLiDOMRef = currentProjectLi
                 
@@ -496,6 +497,7 @@ export const displayControllerWithModule = function(projectModule){
             } else if (e.target.hasAttribute("data-id")){
                 displayMainFromTarget("project", e.target)
             } else if (e.target.classList.contains("add-project-btn")){
+                console.log("hel")
                 showAddWritingEntityDialog("add project")
             }
         })
@@ -530,7 +532,6 @@ export const displayControllerWithModule = function(projectModule){
                 if (caches.currentTabType == "allProjects") {
                     displayMain("allProjects")
                 }
-                console.log(caches.projectsData)
                 
 
             } else if (caches.currentDialogType == "add todo") {
@@ -629,13 +630,15 @@ export const displayControllerWithModule = function(projectModule){
         } else if (e.target === refs.removalDialog.deleteBtn) {
             if (caches.currentTabType == "project"){
                 const index = caches.projectsData.findIndex(item => item.id == caches.currentProject.id)
-                caches.projectsData.splice(index, 1)
+                // caches.projectsData.splice(index, 1)
+                caches.currentProject.remove()
                 displayProjectsNav()
                 displayMain("allProjects")
                 console.log(caches.projectsData)
             } else if (caches.currentTabType == "todo"){
                 const index = caches.currentProjectTodosData.findIndex(item => item.id == caches.currentTodo.id)
-                caches.currentProjectTodosData.splice(index, 1)
+                // caches.currentProjectTodosData.splice(index, 1)
+                caches.currentTodo.remove()
                 displayMain(caches.currentProject)
             }
             refs.removalDialog.close()

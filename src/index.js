@@ -6,16 +6,18 @@ import {displayControllerWithModule} from "./display-controller.js"
     // if (storageAvailable()){
         
     // }
-    let myProject1 = project.createProject("My Title", "My Description")
-    let myProject2 = project.createProject("My Title", "My Description")
-    let myProject3 = project.createProject("My Title", "My Description")
-    myProject1.createTodo("Hi", "How are you?")
-    myProject1.addToCheckList("Do Your Todos")
-    myProject2.addToCheckList("Do Your Todosfaggagagag")
-    myProject2.addToCheckList("Do Your Todosfaggagagag")
+    project.createProjectsFromStorage()
+    // let myProject1 = project.createProject("My Title", "My Description")
+    // let myProject2 = project.createProject("My Title", "My Description")
+    // let myProject3 = project.createProject("My Title", "My Description")
+    // myProject1.createTodo("Hi", "How are you?")
+    // myProject1.addToCheckList("Do Your Todos")
+    // myProject2.addToCheckList("Do Your Todosfaggagagag")
+    // myProject2.addToCheckList("Do Your Todosfaggagagag")
     const displayController = displayControllerWithModule(project)
-    displayController.displayProjectsNav()
     displayController.displayMain("allProjects")
+    displayController.displayProjectsNav()
+    // displayController.displayMain("allProjects")
     // displayController.clearMain()
 
     

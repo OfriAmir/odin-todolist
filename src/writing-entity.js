@@ -1,5 +1,5 @@
 import {compareAsc, format} from "date-fns"
-
+import {project} from "./project.js"
 export const writingEntity = (function() {
     // const defaultPriorityOptions = [
     //     {
@@ -48,8 +48,8 @@ export const writingEntity = (function() {
     }
     function createInstance(){
         let _title, _description, _creationDate, _priority, _id, _dueDate, _notes, _checkList, _complete, _pin
-        // _title = title
-        // _description = description
+        _title = null
+        _description = null
         const now = new Date()
         _creationDate = {
             date: now,
@@ -61,7 +61,10 @@ export const writingEntity = (function() {
             date: null,
             formattedDate: null,
         }
+        _notes = null
         _checkList = []
+        _complete = null
+        _pin = null
         return {_title, _description, _creationDate, _id, _priority, _dueDate, _notes, _checkList, _complete, _pin}
     }
     function addGettersAndSettersToInstance (entity, entitiesArr) {
@@ -69,6 +72,7 @@ export const writingEntity = (function() {
             title: {
                 set(data){
                     this._title = data
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._title
@@ -78,6 +82,7 @@ export const writingEntity = (function() {
             description: {
                 set(data){
                     this._description = data
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._description
@@ -104,6 +109,7 @@ export const writingEntity = (function() {
                 set(num){
                     this._priority = num
                     writingEntity.defaultSort(entitiesArr)
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._priority
@@ -116,6 +122,7 @@ export const writingEntity = (function() {
                         this._dueDate.date = date
                         this._dueDate.formattedDate = format(date,"HH:mm MMMM do, y")
                         writingEntity.defaultSort(entitiesArr);
+                        project.addProjectsToStorage()
                     }
                 },
                 get(){
@@ -126,6 +133,7 @@ export const writingEntity = (function() {
             notes: {
                 set(data){
                     this._notes = data
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._notes
@@ -136,6 +144,7 @@ export const writingEntity = (function() {
                 value: function(data) {
                     const fullData = {content: data, completed: false, id: crypto.randomUUID()}
                     this._checkList.push(fullData)
+                    project.addProjectsToStorage()
                 },
                 // set(data){
                 //     this._checkList.push(data)
@@ -148,6 +157,7 @@ export const writingEntity = (function() {
             completeCheckFromCheckList: {
                 value: function(item){
                     item.completed = true
+                    project.addProjectsToStorage()
                 }
             },
             
@@ -161,6 +171,7 @@ export const writingEntity = (function() {
                 set(data){
                     //should only be boolean, but I don't think I need to validate it here if there will be only one way to interact with it in the UI... 
                     this._complete = data
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._complete
@@ -171,11 +182,19 @@ export const writingEntity = (function() {
                 set(data){
                     //should only be boolean
                     this._pin = data
+                    project.addProjectsToStorage()
                 },
                 get(){
                     return this._pin
                 }
             },
+
+            remove: {
+                value: function(index) {
+                    entitiesArr.splice(index, 1)
+                    project.addProjectsToStorage()
+                }
+            }
         })
     }
     function addInstanceToArr(instance, arr){
